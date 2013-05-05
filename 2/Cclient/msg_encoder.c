@@ -30,8 +30,8 @@ uint8_t * msg_encoder(int code, char *str) {
   /* encode message to buffer */
   ec = der_encode_to_buffer(&asn_DEF_Message, message, buf, sizeof(Message_t));
 
-  xer_fprint(stdout, &asn_DEF_Message, message);
-  printf("%ld\n", sizeof(buf));
+  printf("\n [CLIENT] Encoding !\n\n");
+  //xer_fprint(stdout, &asn_DEF_Message, message);
 
   int msglen = getMsgLength(buf);
   for (int j = 0; j < msglen; j++) {

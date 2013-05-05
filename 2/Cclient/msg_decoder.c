@@ -14,7 +14,12 @@ Message_t * msg_decoder(uint8_t *msg_addr, int size) {
 	if(rval.code != RC_OK) {
 		printf("Decoding failed !\n");
 	}
-	xer_fprint(stdout, &asn_DEF_Message, message);
+  printf("\n [CLIENT] Decoding !\n");
+  for (int j = 0; j < size; j++) {
+    printf("%x ", msg_addr[j]);
+  }
+  printf("\n");
+	//xer_fprint(stdout, &asn_DEF_Message, message);
 	
 	return message;
 }

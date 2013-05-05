@@ -1,0 +1,8 @@
+TestAsn1 DEFINITIONS ::= BEGIN
+
+    TestQuestion ::= SEQUENCE {
+        code INTEGER,
+        word IA5String
+    }
+
+END

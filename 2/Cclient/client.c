@@ -71,8 +71,8 @@ int main(int argc, char **argv) {
 	sendBuffer = msg_encoder(code, randStr);
 	int msg_len = getMsgLength(sendBuffer);
 	
-	printf("\n message length is %d\n", msg_len); 
 	/* send message */
+  printf("\n [CLIENT]\t[SEND] %d\n", code);
 	if ((n = write(sockfd, sendBuffer, (int)msg_len)) < 0) {
 		printf("\n [CLIENT] ERROR : Write Failed !\n");
 		return 1;
@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 	size = getMsgLength(recvBuffer);
 	message = msg_decoder(recvBuffer, size);
 	randStr = (char *)message->randStr.buf;
-	printf(" [CLIENT] Random string is %s\n", randStr);
+	printf(" [CLIENT]\t[RECV] Random string is %s\n", randStr);
 	
 	/* swap case */
 	for (int i=0; i < strlen(randStr); i++){
@@ -97,14 +97,13 @@ int main(int argc, char **argv) {
 		else if (randStr[i] >= 'a' && randStr[i] <= 'z')
 			randStr[i] -= ('a' - 'A');
 	}	
-	printf("\n [CLIENT] [SEND]\t%s\n", randStr);
 	
 	/* encoding swaped case string */
 	sendBuffer = msg_encoder(code, randStr);
 	msg_len = getMsgLength(sendBuffer);
-	printf("\n message length is %d\n", msg_len);
 	
 	/* send message */
+  printf("\n [CLIENT]\t[SEND] %s\n", randStr);
 	if ((n = write(sockfd, sendBuffer, (int)msg_len)) < 0) {
 		printf("\n [CLIENT] ERROR : Write Failed !\n");
 		return 1;
@@ -120,7 +119,7 @@ int main(int argc, char **argv) {
 	size = getMsgLength(recvBuffer);
 	message = msg_decoder(recvBuffer, size);
 	randStr = (char *)message->randStr.buf;
-	printf(" [CLIENT] String is %s\n", randStr);
+	printf(" [CLIENT]\t[RECV] %s\n", randStr);
 	
 	shutdown(sockfd, 2);
 	
