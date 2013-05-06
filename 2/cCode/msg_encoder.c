@@ -34,7 +34,8 @@ uint8_t * msg_encoder(int code, char *str) {
   //xer_fprint(stdout, &asn_DEF_Message, message);
 
   int msglen = getMsgLength(buf);
-  for (int j = 0; j < msglen; j++) {
+  int j;
+  for (j = 0; j < msglen; j++) {
     printf("%x ", buf[j]);
   }
   printf("\n");

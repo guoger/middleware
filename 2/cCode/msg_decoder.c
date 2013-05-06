@@ -15,7 +15,8 @@ Message_t * msg_decoder(uint8_t *msg_addr, int size) {
 		printf("Decoding failed !\n");
 	}
   printf("\n [CLIENT] Decoding !\n");
-  for (int j = 0; j < size; j++) {
+  int j;
+  for (j = 0; j < size; j++) {
     printf("%x ", msg_addr[j]);
   }
   printf("\n");

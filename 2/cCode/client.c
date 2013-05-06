@@ -91,7 +91,9 @@ int main(int argc, char **argv) {
 	printf(" [CLIENT]\t[RECV] Random string is %s\n", randStr);
 	
 	/* swap case */
-	for (int i=0; i < strlen(randStr); i++){
+    int lenStr = strlen(randStr);
+    int i;
+	for (i=0; i < lenStr ; i++){
 		if (randStr[i] >= 'A' && randStr[i] <= 'Z')
 			randStr[i] += ('a' - 'A');
 		else if (randStr[i] >= 'a' && randStr[i] <= 'z')

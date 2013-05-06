@@ -1,8 +1,0 @@
-MessageModule DEFINITIONS ::= BEGIN
-
-Message ::= SEQUENCE {
-	code	INTEGER,
-	randStr	IA5String
-}
-
-END
