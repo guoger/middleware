@@ -1,0 +1,16 @@
+module StockExchange {
+
+    interface Quoter {
+    
+        exception InvalidStockName {};
+        exception InvalidStockID {};
+        
+        float getQuoteByName(in string stockName)
+            raises (InvalidStockName);
+            
+        float getQuoteByID(in string stockID)
+            raises (InvalidStockID);    
+    
+    };
+    
+};

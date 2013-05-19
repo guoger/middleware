@@ -1,0 +1,11 @@
+compile
+javac -cp ~/workspace/mw3 ./StockExchange/*.java
+
+server
+akis@ubuntu:~/workspace/mw3$ java -cp ~/workspace/mw3/ StockExchange.Server asd 
+
+client
+akis@ubuntu:~/workspace/mw3$ java -cp ~/workspace/mw3/ StockExchange.Client asd Company3 COM5
+
+
+it runs using the classes in the "StockExchange" folder ...
