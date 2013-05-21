@@ -1,0 +1,7 @@
+module middleware {
+  module stockExchangeSII {
+    interface RequestQuote {
+      double reqQuote (in string tab);
+    };
+  };
+};

@@ -1,0 +1,8 @@
+module middleware {
+  module stockExchangeAMI {
+    exception InvalidIndex {};
+    interface RequestQuote {
+      double getQuote (in string tab) raises (InvalidIndex);
+    };
+  };
+};

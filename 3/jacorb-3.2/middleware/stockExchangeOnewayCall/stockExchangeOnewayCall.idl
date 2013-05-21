@@ -1,0 +1,10 @@
+module middleware {
+  module stockExchangeOnewayCall {
+    interface Reply {
+      oneway void replyWithQuote ( in double quote );
+    };
+    interface Request {
+      oneway void requestByTab ( in string tab );
+    };
+  };
+};
