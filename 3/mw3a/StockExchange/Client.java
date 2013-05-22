@@ -7,45 +7,30 @@ public class Client
 {
     public static void main( String args[] )
     {
-        if( args.length != 2 )
+        if( args.length != 1 )
         {
-            System.out.println( "Usage: java StockExchange.Client <file> <name/ID>" );
+            System.out.println( "Usage: java StockExchange.Client <name/ID>" );
             System.exit( 1 );
         }
 
         try
         {
-            File f = new File( args[0] );
+            File f = new File( "IOR_file");
 
-            //check if file exists
-            if( ! f.exists() )
-            {
-                System.out.println("File " + args[0] + " does not exist.");
-                System.exit( -1 );
-            }
-
-            //check if args[0] points to a directory
-            if( f.isDirectory() )
-            {
-                System.out.println("File " + args[0] + " is a directory.");
-                System.exit( -1 );
-            }
-            
-            String nameORid = args[1];
+            String nameORid = args[0];
 
             // initialize the ORB.
             ORB orb = ORB.init( args, null );
 
             BufferedReader br = new BufferedReader( new FileReader( f ));
-            // get object reference from command-line argument file
+            // get object reference from file
             org.omg.CORBA.Object obj = orb.string_to_object( br.readLine() );
             br.close();
 
-            // and narrow it to HelloWorld.GoodDay
-            // if this fails, a BAD_PARAM will be thrown
+            // and narrow it
             Quoter myQuoter = QuoterHelper.narrow( obj );
             
-            // if args[1] starts with "DE" (capitals), it means we search for ID
+            // if nameORid starts with "DE" (capitals), it means we search for ID
             // else we search for Name...
             if ((nameORid.charAt(0) == 'D') && (nameORid.charAt(1) == 'E')) {
                 // invoke the operation by ID and print the stock Quote
@@ -56,11 +41,11 @@ public class Client
                     System.out.println("ID:" + nameORid + "\tQuote: " + x);                
             }
             else {
+                // invoke the operation by Name and print the stock Quote                    
                 float x = myQuoter.getQuoteByName(nameORid);                
                 if (x == -1)
                     System.out.println("Name not found :(");
                 else
-                    // invoke the operation by Name and print the stock Quote                    
                     System.out.println("Name:" + nameORid + "\tQuote: " + x);
             }
 

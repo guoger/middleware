@@ -1,0 +1,16 @@
+module StockExchange {
+
+    interface Quoter {
+    
+        oneway void getQuoteByName(in string stockName);
+
+        oneway void getQuoteByID(in string stockID);   
+    };
+    
+    interface Responder {
+        
+        oneway void respondQuote(in float quote);
+        
+    };
+           
+};

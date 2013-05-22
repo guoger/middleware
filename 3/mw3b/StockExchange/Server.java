@@ -24,22 +24,10 @@ public class Server
         // create the object reference
         org.omg.CORBA.Object o = poa.servant_to_reference(myQuoter);
 
-        PrintWriter ps = new PrintWriter(new FileOutputStream(new File( args[0] )));
+        PrintWriter ps = new PrintWriter(new FileOutputStream(new File( "IOR_file" )));
         ps.println( orb.object_to_string( o ) );
         ps.close();
-
-        if (args.length == 2)
-        {
-            File killFile = new File(args[1]);
-            while(!killFile.exists())
-            {
-                Thread.sleep(1000);
-            }
-            orb.shutdown(true);
-        }
-        else
-        {
-            orb.run();
-        }
+        
+        orb.run();
     }
 }
