@@ -10,5 +10,9 @@ public class Run {
         for (Failure failure : result.getFailures()) {
             System.out.println(failure.toString());
         }
+        /*result = JUnitCore.runClasses(StartClient.class);
+        for (Failure failure : result.getFailures()) {
+            System.out.println(failure.toString());
+        }*/
     }
 } 

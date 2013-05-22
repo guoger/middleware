@@ -16,8 +16,6 @@ import java.io.OutputStream;
 public class BareFunctionality {
     private static QuoterImpl quote;
 
-    public BareFunctionality() {
-    }
     @BeforeClass
     public static void testSetup() {
         PrintStream originalStream = System.out;
@@ -34,10 +32,14 @@ public class BareFunctionality {
     public void test_quote_by_name() {
         float ret = quote.getQuoteByName("adidas AG");
         assertEquals("could not get quote by name", 85.52, ret, 0.01);
+        ret = quote.getQuoteByName("ernegli");
+        assertEquals("quote for invalid name gave wrong response", -1, ret, 0.01);
     } 
     @Test
     public void test_quote_by_id() {
         float ret = quote.getQuoteByID("DE000A1EWWW0");
         assertEquals("could not get quote by ID", 85.52, ret, 0.01);
+        ret = quote.getQuoteByID("ernegli");
+        assertEquals("quote for invalid ID gave wrong response", -1, ret, 0.01);
     }
 }
