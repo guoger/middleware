@@ -1,0 +1,5 @@
+Usage:
+
+jaco middleware.stockExchangeSII.Server ServerIOR
+
+jaco middleware.stockExchangeSII.Client ServerIOR adidas AG

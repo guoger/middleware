@@ -1,0 +1,9 @@
+Usage:
+
+jaco middleware.stockExchangeOnewayCall.Server
+
+jaco middleware.stockExchangeOnewayCall.Client adidas AG
+
+Notice:
+  For this implementation, both Server and Client will create IOR file automatically,
+  namely ServerIOR and ClientIOR.

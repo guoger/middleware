@@ -1,0 +1,19 @@
+Classes gerQuote implement actual looking up functions.
+It's invoked by every server. Please avoid to touch it.
+
+stockExchangeSII is Question 1a,
+stockExchangeOnewayCall is Question 1c,
+stockExchangeAMI is Question 1d.
+
+Every thing is using an IOR file to lookup/register the instance ranther
+than a name server.
+
+Run from the folder containing middleware,
+e.g.
+jacorb-3.2$ jaco middleware.stockExchangeSII.Server ServerIOR
+
+NOTICE, please make sure that you have DAX.in file in your current folder.
+
+Please refer to HowTo in specific folder to check arguments input.
+
+Happy coding!
