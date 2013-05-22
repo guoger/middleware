@@ -4,4 +4,6 @@ akis@ubuntu:~/workspace/mw3$ java StockExchange.Server
 
 akis@ubuntu:~/workspace/mw3$ java StockExchange.Client "SAP AG"
 
+and to test
+akis@ubuntu:~/workspace/mw3$ java StockExchange.test.Run
 
