@@ -18,15 +18,7 @@ public class BareFunctionality {
 
     @BeforeClass
     public static void testSetup() {
-        PrintStream originalStream = System.out;
-        PrintStream dummyStream    = new PrintStream(new OutputStream(){
-            public void write(int b) {
-                //NO-OP
-            }
-        });
-        System.setOut(dummyStream);
         quote = new QuoterImpl();
-        System.setOut(originalStream);
     }
     @Test
     public void test_quote_by_name() {
