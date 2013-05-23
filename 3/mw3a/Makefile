@@ -1,5 +1,7 @@
 all:
 	javac -cp . ./StockExchange/*.java
+	javac -cp . ./StockExchange/test/*.java
+	javac -cp . ./StockExchange/QuoterPackage/*.java
 
 server: 
 	java StockExchange.Server
