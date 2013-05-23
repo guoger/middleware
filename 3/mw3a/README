@@ -1,0 +1,8 @@
+create source:
+make
+
+run server:
+make server
+
+run client:
+make client
