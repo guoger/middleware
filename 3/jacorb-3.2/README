@@ -1,0 +1,22 @@
+Jiannan Guo
+Kaleab Ejigayehu
+Niklas Semmler
+
+first compile the code with
+make clean && make
+
+Please kill the server when you switch between SII, DII - AMI - oneway call
+
+a & b & e
+make server_sii &
+make client_sii
+make client_dii
+make test
+
+c
+make server_ami &
+make client_ami
+
+d
+make server_oneway_call &
+make client_oneway_call
