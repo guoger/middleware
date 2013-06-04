@@ -1,6 +1,6 @@
 package stocks;
 
-public class StockName {
+public class StockName extends StockIdentifier {
 
 	private String stockName;
 	
@@ -18,6 +18,15 @@ public class StockName {
 	
 	public void setName(String stockName) {
 		this.stockName = stockName;
+	}
+
+	public String getType() {
+		return "Name";
+	}
+	
+	@Override
+	public String getValue() {
+		return this.stockName;
 	}
 
 }

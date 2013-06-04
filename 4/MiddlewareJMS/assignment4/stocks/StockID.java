@@ -1,6 +1,6 @@
 package stocks;
 
-public class StockID {
+public class StockID extends StockIdentifier {
 	
 	private String stockID;
 	
@@ -18,6 +18,15 @@ public class StockID {
 	
 	public void setID(String stockID) {
 		this.stockID = stockID;
+	}
+
+	public String getType() {
+		return "ID";
+	}
+
+	@Override
+	public String getValue() {
+		return this.stockID;
 	}
 
 }
