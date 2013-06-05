@@ -4,6 +4,11 @@ import javax.jms.*;
 
 import stocks.*;
 
+
+/*
+ * Usage of QuotePublisher:
+ * 
+ */
 public class QuotePublisher {
 	private String subject;
 	
@@ -13,19 +18,8 @@ public class QuotePublisher {
 	TextMessage message;
 	String stockQuoteText;
 	
-	public QuotePublisher(StockName stockName, TopicSession topicSession) {
-		this.subject = stockName.getName();
-		this.topicSession = topicSession;
-		try {
-			createTopic();
-		} catch (JMSException e) {
-			System.out.println(" [Publisher]\tInitialization failed!");
-			e.printStackTrace();
-		}
-	}
-
-	public QuotePublisher(StockID stockID, TopicSession topicSession) {
-		this.subject = stockID.getID();
+	public QuotePublisher(StockIdentifier stockIdentifier, TopicSession topicSession) {
+		this.subject = stockIdentifier.getValue();
 		this.topicSession = topicSession;
 		try {
 			createTopic();
