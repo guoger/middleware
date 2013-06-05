@@ -34,7 +34,7 @@ public class QuoteSubscriber extends Thread {
 	
 	@Override
 	public void run() {
-		SubListener listener = new SubListener();
+		SubListener listener = new SubListener(s);
 		try {
 			topicSubscriber.setMessageListener(listener);
 		} catch (JMSException e) {
@@ -58,13 +58,18 @@ public class QuoteSubscriber extends Thread {
 }
 
 class SubListener implements MessageListener {
+	String subTopic;
+	public SubListener(StockIdentifier s) {
+		subTopic = s.getValue();
+	}
 	// Override interface MessageListener to unblocking receive message
 	@Override
 	public void onMessage(Message msg) {
 		if(msg instanceof TextMessage) {
 			TextMessage textMsg = (TextMessage) msg;
 			try {
-				System.out.println("Received message: "+textMsg.getText());
+				System.out.println(" [Subscriber] Receive message:\t"+subTopic+
+						"\n\t\t\t"+textMsg.getText());
 			} catch (JMSException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
