@@ -92,7 +92,8 @@ class QuoteRefresh extends Thread {
 	QuotePublisher publishQuoteByName = null;
 	QuotePublisher publishQuoteByID = null;
 	TopicSession topicSession = null;
-	String timeStamp;
+	SimpleDateFormat timeStamp = new SimpleDateFormat("yyyyMMddHHmmssz");
+	String currentTime;
 	
 	public QuoteRefresh(Company company, TopicSession topicSess) {
 		this.company = company;
@@ -135,9 +136,9 @@ class QuoteRefresh extends Thread {
 		System.out.println("\t"+companyToPublish.stockName.getName()+"\n\t"+
 				companyToPublish.stockID.getID()+"\t"+
 				tempQuote);
-		timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
-		publishQuoteByName.publishContent(Float.toString(tempQuote)+"|"+timeStamp);
-		publishQuoteByID.publishContent(Float.toString(tempQuote)+"|"+timeStamp);
+		currentTime = timeStamp.format(Calendar.getInstance().getTime());
+		publishQuoteByName.publishContent(Float.toString(tempQuote)+":"+currentTime);
+		publishQuoteByID.publishContent(Float.toString(tempQuote)+":"+currentTime);
 	}
 	
 	

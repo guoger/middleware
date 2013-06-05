@@ -1,5 +1,10 @@
 package quoteSubscriber;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import javax.jms.*;
 import javax.naming.*;
 
@@ -58,7 +63,12 @@ public class QuoteSubscriber extends Thread {
 }
 
 class SubListener implements MessageListener {
-	String subTopic;
+	String subTopic, temp;
+	TextMessage textMsg;
+	String[] msgContent;
+	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssz");
+	Date currentTime = new Date();
+	
 	public SubListener(StockIdentifier s) {
 		subTopic = s.getValue();
 	}
@@ -66,15 +76,33 @@ class SubListener implements MessageListener {
 	@Override
 	public void onMessage(Message msg) {
 		if(msg instanceof TextMessage) {
-			TextMessage textMsg = (TextMessage) msg;
+			textMsg = (TextMessage) msg;
 			try {
-				System.out.println(" [Subscriber] Receive message:\t"+subTopic+
-						"\n\t\t\t"+textMsg.getText());
+				temp = textMsg.getText();
+				//System.out.println(temp);
+				msgContent = parseMessage(temp);
+				//System.out.println(msgContent[0]);
 			} catch (JMSException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			System.out.println(" [Subscriber] "+subTopic
+					+"\n\t\tQuote: "+msgContent[0]+" | "+msgContent[1]);
 		}
+	}
+	
+	@SuppressWarnings("deprecation")
+	public String[] parseMessage(String msg) {
+		try {
+			msgContent = msg.split(":");
+			//System.out.println(msgContent[0]+"  "+msgContent[1]);
+			currentTime = dateFormat.parse(msgContent[1]);
+			msgContent[1] = currentTime.toGMTString();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return msgContent;
 	}
 	
 }
