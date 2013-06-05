@@ -113,8 +113,16 @@ class QuoteRefresh extends Thread {
 		while(true) {
 			// Generate random number between 5 and 15 as sleep seconds
 			refreshInterval = (randGen.nextInt(11) + 5) * 1000;
-			// changeQuote() is a method implement in company class
-			company.changeQuote();
+			// Generate new quote price randomly
+			float changePercent =
+					(float)((randGen.nextInt(41)-20))/(float)1000;
+			float newQuote = (this.company.stockQuote.getQuote()*((float)1 + changePercent));
+			// Record current time
+			currentTime = timeStamp.format(Calendar.getInstance().getTime());
+			// update quote price
+			company.setQuote(newQuote);
+			// update time
+			company.setTime(currentTime);
 			// Publish the quote to JMS platform
 			try {
 				publishQuoteToJMS(company);
@@ -136,9 +144,10 @@ class QuoteRefresh extends Thread {
 		System.out.println("\t"+companyToPublish.stockName.getName()+"\n\t"+
 				companyToPublish.stockID.getID()+"\t"+
 				tempQuote);
-		currentTime = timeStamp.format(Calendar.getInstance().getTime());
-		publishQuoteByName.publishContent(Float.toString(tempQuote)+":"+currentTime);
-		publishQuoteByID.publishContent(Float.toString(tempQuote)+":"+currentTime);
+		publishQuoteByName.publishContent(Float.toString(tempQuote)+":"
+				+companyToPublish.getStockTime());
+		publishQuoteByID.publishContent(Float.toString(tempQuote)+":"
+				+companyToPublish.getStockTime());
 	}
 	
 	

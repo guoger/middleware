@@ -87,7 +87,7 @@ class SubListener implements MessageListener {
 				e.printStackTrace();
 			}
 			System.out.println(" [Subscriber] "+subTopic
-					+"\n\t\tQuote: "+msgContent[0]+" | "+msgContent[1]);
+					+"\n\t\tQuote price : "+msgContent[0]+"\t\t| "+msgContent[1]);
 		}
 	}
 	
