@@ -1,0 +1,10 @@
+# ignore files list #
+#####################
+
+# compile source #
+*.class
+
+
+# OS generated files #
+.DS_Store
+._*
