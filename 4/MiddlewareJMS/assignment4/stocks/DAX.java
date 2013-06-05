@@ -2,6 +2,8 @@ package stocks;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Vector;
 import java.util.Random;
 
@@ -11,6 +13,8 @@ public class DAX {
 	Float quote;
 	int maxCom = 100;
 	Company company;
+	private SimpleDateFormat timeStamp = new SimpleDateFormat("yyyyMMddHHmmssz");
+	String tempTime;
 	
 	// Create a Vector to hold all DAX companies
 	Vector<Company> daxCompanies = null;
@@ -25,6 +29,8 @@ public class DAX {
 	
 	public Vector<Company> establish() {
 		daxCompanies = new Vector<Company>();
+		// The timeStamp of initialization
+		tempTime = timeStamp.format(Calendar.getInstance().getTime());
 		// Initialize DAX market using DAX.in file
 		try {
 	        BufferedReader in = new BufferedReader(new FileReader("DAX.in"));
@@ -32,7 +38,7 @@ public class DAX {
 		        stockName = temp;
 		        stockID = in.readLine();
 		        quote = Float.parseFloat(in.readLine());
-		        company = new Company(stockName, stockID, quote);
+		        company = new Company(stockName, stockID, quote, tempTime);
 		        daxCompanies.addElement(company);
 	        }
 	        in.close();
