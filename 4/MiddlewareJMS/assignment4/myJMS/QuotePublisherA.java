@@ -1,5 +1,6 @@
 package myJMS;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.jms.JMSException;
@@ -83,12 +84,15 @@ public class QuotePublisherA {
 	
 }
 
+
+
 class QuoteRefresh extends Thread {
 	Company company;
 	static Random randGen;
 	QuotePublisher publishQuoteByName = null;
 	QuotePublisher publishQuoteByID = null;
 	TopicSession topicSession = null;
+	String timeStamp;
 	
 	public QuoteRefresh(Company company, TopicSession topicSess) {
 		this.company = company;
@@ -131,8 +135,9 @@ class QuoteRefresh extends Thread {
 		System.out.println("\t"+companyToPublish.stockName.getName()+"\n\t"+
 				companyToPublish.stockID.getID()+"\t"+
 				tempQuote);
-		publishQuoteByName.publishContent(Float.toString(tempQuote));
-		publishQuoteByID.publishContent(Float.toString(tempQuote));
+		timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+		publishQuoteByName.publishContent(Float.toString(tempQuote)+"|"+timeStamp);
+		publishQuoteByID.publishContent(Float.toString(tempQuote)+"|"+timeStamp);
 	}
 	
 	
