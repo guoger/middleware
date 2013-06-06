@@ -2,6 +2,7 @@ package myJMS;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.io.*;
 
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -21,6 +22,11 @@ public class QuotePublisherA {
 	static int daxSize;
 	static DAX dax;
 	static QuoteRefresh quoteRefresh;
+	static Company company;
+	
+	// PublishSession
+	static TopicSession stockPublishSession = null;
+	
 	
 	// Using default url of JMS, which is localhost
 	private static String url = ActiveMQConnection.DEFAULT_BROKER_URL;
@@ -34,7 +40,7 @@ public class QuotePublisherA {
 		dax = new DAX();
 		daxCompanies = dax.establish();
 		daxSize = daxCompanies.size();
-		TopicSession stockPublishSession = null;
+		//stockPublishSession = null;
 		/*
 		 * Initialize TopicConnectionFactory, TopicConnection and TopicSession
 		 * A valid TopicSession should be available after successful execution
@@ -54,6 +60,22 @@ public class QuotePublisherA {
 		}
 	}
 	
+	
+	private static int addNewStock(String name, String id, float quote) {
+		String tempName, tempID;
+		for (i=0; i<daxSize; i++) {
+			tempName = quoteRefreshThreads.elementAt(i).company.name;
+			tempID = quoteRefreshThreads.elementAt(i).company.id;
+			if (tempName.equals(name) || tempID.equals(id)) {
+				return 1;
+			}
+		}
+		Company newCompany = dax.addNewCompany(name, id, quote);
+		quoteRefresh = new QuoteRefresh(newCompany, stockPublishSession);
+		quoteRefreshThreads.addElement(quoteRefresh);
+		quoteRefresh.start();
+		return 0;
+	}
 	
 	/*
 	 * A static method initializing JMS and return a valid TopicSession instance.
@@ -80,6 +102,86 @@ public class QuotePublisherA {
 	 */
 	public static void main(String[] args) {
 		QuotePublisherA qa = new QuotePublisherA();
+		// System.out.println(" [Publisher]\tPlease input command:");
+		String command = "";
+		String userStockName, userStockID, userStockIdentifier;
+		String userStockQuoteTemp = "";
+		float userStockQuote;
+		Console console = System.console();
+		if (console == null) {
+			System.err.println("No console found.");
+			System.exit(1);
+		}
+		System.out.println("\n\n");
+		while (true) {
+			command = console.readLine("Enter 'new' to create stock, 'delete' to remove stock or 'exit' to quit: ");
+			
+			if (command.equals("new")) {
+				// System.out.println("To create a new stock, please input info......");
+				userStockName = console.readLine("Enter stock name: ");
+				userStockID = console.readLine("Enter stock ID: ");
+				userStockQuoteTemp = console.readLine("Enter stock price: ");
+				userStockQuote = Float.parseFloat(userStockQuoteTemp);
+				if (addNewStock(userStockName, userStockID, userStockQuote) == 1) {
+					System.out.println(" [Publisher]\tStock already exists!");
+				} else {
+					System.out.println(" [Publisher]\tSuccessfully create stock: "+userStockName+" "+userStockID+
+							"\n\t\t"+userStockQuote+"\n");
+				}
+			} else if (command.equals("delete")) {
+				userStockIdentifier = console.readLine("To delete a stock, please input stock name or ID: ");
+			} else if (command.equals("exit")) {
+				break;
+			}
+		}
+		
+		// Serializing DAX
+		System.out.println(" [Publisher]\tStoring DAX......");
+		try {
+			FileOutputStream fileOut =
+					new FileOutputStream("DAX.der");
+			ObjectOutputStream out =
+					new ObjectOutputStream(fileOut);
+			out.writeObject(dax);
+			out.close();
+			fileOut.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(" [Publisher]\t......complete!");
+		
+		/*
+		 * For debugging serialization.
+		 * Read out DAX.der and print exit state
+		 */
+		try {
+			FileInputStream fileIn =
+					new FileInputStream("DAX.der");
+			ObjectInputStream in =
+					new ObjectInputStream(fileIn);
+			dax = (DAX) in.readObject();
+			in.close();
+			fileIn.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		dax.printDAX();
+		System.out.println("\nBye!");
+		System.exit(0);
 	}
 	
 }
@@ -141,9 +243,9 @@ class QuoteRefresh extends Thread {
 
 	private void publishQuoteToJMS(Company companyToPublish) throws JMSException {
 		float tempQuote = companyToPublish.stockQuote.getQuote();
-		System.out.println("\t"+companyToPublish.stockName.getName()+"\n\t"+
-				companyToPublish.stockID.getID()+"\t"+
-				tempQuote);
+		//System.out.println("\t"+companyToPublish.stockName.getName()+"\n\t"+
+		//		companyToPublish.stockID.getID()+"\t"+
+		//		tempQuote);
 		publishQuoteByName.publishContent(Float.toString(tempQuote)+":"
 				+companyToPublish.getStockTime());
 		publishQuoteByID.publishContent(Float.toString(tempQuote)+":"

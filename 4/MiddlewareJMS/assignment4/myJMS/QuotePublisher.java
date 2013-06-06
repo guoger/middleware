@@ -45,7 +45,11 @@ public class QuotePublisher {
 		// Set message context
 		message.setText(content);
 		topicPublisher.publish(message);
-		System.out.println(" Publish: "+content+" to topic "+subject);
+		/*
+		 * Print out quote change
+		 * Just for debugging, might mess the console up
+		 */
+		// System.out.println(" Publish: "+content+" to topic "+subject);
 	}
 
 	public static void main(String[] args) throws Exception {
