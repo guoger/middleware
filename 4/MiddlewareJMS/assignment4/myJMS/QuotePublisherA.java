@@ -60,21 +60,39 @@ public class QuotePublisherA {
 		}
 	}
 	
-	
+	/*
+	 * Add a new stock
+	 * First check whether the stock already exist, return 1 if it does, otherwise, create it
+	 * and start refreshing and return 0;
+	 */
 	private static int addNewStock(String name, String id, float quote) {
 		String tempName, tempID;
-		for (i=0; i<daxSize; i++) {
-			tempName = quoteRefreshThreads.elementAt(i).company.name;
-			tempID = quoteRefreshThreads.elementAt(i).company.id;
+		for (QuoteRefresh c : quoteRefreshThreads) {
+			tempName = c.company.name;
+			tempID = c.company.id;
 			if (tempName.equals(name) || tempID.equals(id)) {
 				return 1;
 			}
 		}
-		Company newCompany = dax.addNewCompany(name, id, quote);
+		Company newCompany = dax.addCompany(name, id, quote);
 		quoteRefresh = new QuoteRefresh(newCompany, stockPublishSession);
 		quoteRefreshThreads.addElement(quoteRefresh);
 		quoteRefresh.start();
 		return 0;
+	}
+	
+	@SuppressWarnings("deprecation")
+	private static int removeStock(String i) {
+		for (QuoteRefresh c : quoteRefreshThreads) {
+			String s1 = c.company.name;
+			String s2 = c.company.id;
+			if (s1.equals(i) || s2.equals(i)) {
+				c.stop();
+				quoteRefreshThreads.removeElement(c);
+				return dax.removeCompany(i);
+			}
+		}
+		return 1;
 	}
 	
 	/*
@@ -130,6 +148,11 @@ public class QuotePublisherA {
 				}
 			} else if (command.equals("delete")) {
 				userStockIdentifier = console.readLine("To delete a stock, please input stock name or ID: ");
+				if (removeStock(userStockIdentifier) == 1) {
+					System.out.println(" [Publisher]\tStock does not exists!");
+				} else {
+					System.out.println(" [Publisher]\tSuccessfully delete stock!");
+				}
 			} else if (command.equals("exit")) {
 				break;
 			}
