@@ -55,11 +55,21 @@ public class DAX implements java.io.Serializable {
 		return daxCompanies;
 	}
 	
-	public Company addNewCompany(String stockName, String stockID, float stockQuote) {
+	public Company addCompany(String stockName, String stockID, float stockQuote) {
 		tempTime = timeStamp.format(Calendar.getInstance().getTime());
 		company = new Company(new StockName(stockName), new StockID(stockID), new StockQuote(stockQuote), new StockTime(tempTime));
 		daxCompanies.addElement(company);
 		return company;
+	}
+	
+	public int removeCompany(String i) {
+		for (Company c : daxCompanies) {
+			if (c.name.equals(i) || c.id.equals(i)) {
+				daxCompanies.removeElement(c);
+				return 0;
+			}
+		}
+		return 1;
 	}
 	
 	public void printDAX() {
