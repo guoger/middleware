@@ -3,10 +3,11 @@ package stocks;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class StockTime {
+@SuppressWarnings("serial")
+public class StockTime implements java.io.Serializable {
 
 	private String stockTime;
-	private SimpleDateFormat timeStamp = new SimpleDateFormat("yyyyMMddHHmmssz");
+	transient private SimpleDateFormat timeStamp = new SimpleDateFormat("yyyyMMddHHmmssz");
 	
 	public StockTime() {
 		this.stockTime =

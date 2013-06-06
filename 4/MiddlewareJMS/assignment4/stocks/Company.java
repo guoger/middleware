@@ -2,7 +2,8 @@ package stocks;
 
 import java.util.*;
 
-public class Company {
+@SuppressWarnings("serial")
+public class Company implements java.io.Serializable {
 	public String name;
 	public String id;
 	public float quote;
@@ -17,7 +18,7 @@ public class Company {
 	public StockQuote stockQuote;
 	public StockTime stockTime;
 	
-	static Random randGen = new Random();
+	transient static Random randGen = new Random();
 	
 	public Company() {
 		// for old version
@@ -43,6 +44,20 @@ public class Company {
 		this.stockID = new StockID(stockID);
 		this.stockQuote = new StockQuote(quote);
 		this.stockTime = new StockTime(stockTime);
+	}
+	
+	public Company(StockName stockName, StockID stockID, StockQuote stockQuote, StockTime stockTime) {
+		// for old version
+		this.name = stockName.getName();
+		this.id = stockID.getID();
+		this.quote = stockQuote.getQuote();
+		this.time = stockTime.getTime();
+		
+		// for new version
+		this.stockName = stockName;
+		this.stockID = stockID;
+		this.stockQuote = stockQuote;
+		this.stockTime = stockTime;
 	}
 
 	public void setQuote(float newQuote) {

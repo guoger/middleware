@@ -1,5 +1,6 @@
 package stocks;
 
+@SuppressWarnings("serial")
 public class StockName extends StockIdentifier {
 
 	private String stockName;

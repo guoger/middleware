@@ -1,6 +1,7 @@
 package stocks;
 
-public abstract class StockIdentifier {
+@SuppressWarnings("serial")
+public abstract class StockIdentifier implements java.io.Serializable {
 
 	private String value;
 	

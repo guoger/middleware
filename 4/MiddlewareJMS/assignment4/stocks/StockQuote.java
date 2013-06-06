@@ -1,6 +1,7 @@
 package stocks;
 
-public class StockQuote {
+@SuppressWarnings("serial")
+public class StockQuote implements java.io.Serializable {
 
 	private float stockQuote;
 	
