@@ -26,6 +26,7 @@ public class QuotePublisherA {
 	
 	// PublishSession
 	static TopicSession stockPublishSession = null;
+	static TopicConnection topicConn;
 	
 	
 	// Using default url of JMS, which is localhost
@@ -107,7 +108,7 @@ public class QuotePublisherA {
 		 * JMS Pub/Sub Initialization, create session used by all topic publisher.
 		 */
 		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
-		TopicConnection topicConn = connectionFactory.createTopicConnection();
+		topicConn = connectionFactory.createTopicConnection();
 		topicConn.start();
 		TopicSession topicSess = topicConn.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 		return topicSess;
@@ -157,6 +158,16 @@ public class QuotePublisherA {
 				break;
 			}
 		}
+		
+		System.out.println("Closing TopicSession...");
+		try {
+			stockPublishSession.close();
+			topicConn.close();
+		} catch (JMSException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		
 		// Serializing DAX
 		System.out.println(" [Publisher]\tStoring DAX......");
@@ -210,7 +221,11 @@ public class QuotePublisherA {
 }
 
 
-
+/*
+ * Every thread will hold a stock. Change the quote randomly (5 to 15 sec)
+ * And then publish it to respective topic.
+ * Time stamp included
+ */
 class QuoteRefresh extends Thread {
 	Company company;
 	static Random randGen;
