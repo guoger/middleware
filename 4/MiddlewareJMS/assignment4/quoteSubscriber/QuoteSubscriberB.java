@@ -33,7 +33,7 @@ public class QuoteSubscriberB {
 	
 	public static TopicSession initializeJMS() throws Exception {
 		/*
-		 * JMS Pub/Sub Initialization, create session used by all topic publisher.
+		 * JMS Pub/Sub Initialization, create session used by all topic subscriber.
 		 */
 		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
 		topicConn = connectionFactory.createTopicConnection();
@@ -46,6 +46,7 @@ public class QuoteSubscriberB {
 	 * Load subscribe list from SubscribeList.in file
 	 */
 	private void loadFromIn(String fileName) throws IOException, JMSException {
+		System.out.println(" [Subscriber]\tLoading "+fileName+"......");
 		String temp;
 		BufferedReader in =
 				new BufferedReader(new FileReader(fileName));
@@ -61,14 +62,14 @@ public class QuoteSubscriberB {
 				stockIdentifier = new StockName(temp);
 			}
 			quoteSubscriber =
-					new QuoteSubscriber();
+					new QuoteSubscriber(stockIdentifier, stockSubscribeSession);
 			// Insert and start a new QuoteSubscriber thread
 			watchList.addElement(quoteSubscriber);
 			quoteSubscriber.s = stockIdentifier;
 			quoteSubscriber.topicSession = stockSubscribeSession;
 			quoteSubscriber.setup();
 		}
-		System.out.println("Load in successfully!");
+		System.out.println(" [Subscriber]\t......Load "+fileName+" successfully!");
 		in.close();
 	}
 	
@@ -77,19 +78,20 @@ public class QuoteSubscriberB {
 	 */
 	@SuppressWarnings("unchecked")
 	private void loadFromSer(String fileName) throws IOException, ClassNotFoundException, JMSException {
+		System.out.println(" [Subscriber]\tLoading "+fileName+"......");
 		FileInputStream fileIn =
 				new FileInputStream(fileName);
 		ObjectInputStream in =
 				new ObjectInputStream(fileIn);
 		watchList = (Vector<QuoteSubscriber>) in.readObject();
 		for (QuoteSubscriber q : watchList) {
-			q.dateFormat = new SimpleDateFormat("yyyyMMddHHmmssz");
+			// q.dateFormat = new SimpleDateFormat("yyyyMMddHHmmssz");
 			q.topicSession = stockSubscribeSession;
-			System.out.println(q.topicSubscriber);
+			// System.out.println(q.topicSubscriber);
 			q.setup();
-			System.out.println(q.topicSubscriber);
+			// System.out.println(q.topicSubscriber);
 		}
-		System.out.println("Load ser successfully!");
+		System.out.println(" [Subscriber]\t......load "+fileName+" successfully!");
 		in.close();
 		fileIn.close();
 	}
@@ -120,7 +122,7 @@ public class QuoteSubscriberB {
 		
 		Console console = System.console();
 		if (console == null) {
-			System.err.println("No console found.");
+			System.err.println(" [Subscriber]\tNo console found!");
 			System.exit(1);
 		}
 		
@@ -179,11 +181,7 @@ public class QuoteSubscriberB {
 					"an exist stock, 'exit' to quite.\n>> ");
 			if (command.equals("new")) {
 				userStockIdentifier = console.readLine("Enter name or ID: ");
-				if (userStockIdentifier.startsWith("DE")) {
-					subscribeNewStock(userStockIdentifier);
-				} else {
-					System.out.println(" [Subscriber]\tStock Name is not supported.");
-				}
+				subscribeNewStock(command);
 			} else if (command.equals("delete")) {
 				
 			} else if (command.equals("exit")) {

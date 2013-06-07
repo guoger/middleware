@@ -25,17 +25,16 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	
 	transient String subTopic;
 	transient String[] msgContent;
-	transient SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssz");
+	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssz");
 	Date currentTime;
 	float currentQuote;
 	
 	
 	// Construct object by StockName and TopicSession
-	public QuoteSubscriber() {
-		// this.s = si;
-		// this.subject = s.getValue();
-		// this.topicSession = topicSession;
-		// listener = new SubListener(s);
+	public QuoteSubscriber(StockIdentifier si, TopicSession topicSession) {
+		this.s = si;
+		this.subject = s.getValue();
+		this.topicSession = topicSession;
 	}
 
 	public StockIdentifier getStockIdentifier() {
@@ -93,7 +92,6 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 			textMsg = (TextMessage) msg;
 			try {
 				temp = textMsg.getText();
-				System.out.println("Correct msg!"+"\n"+temp);
 				//System.out.println(temp);
 				parseMessage(temp);
 				//System.out.println(msgContent[0]);
