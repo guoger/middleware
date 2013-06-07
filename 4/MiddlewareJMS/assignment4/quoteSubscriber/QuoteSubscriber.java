@@ -13,14 +13,11 @@ import stocks.*;
 //@SuppressWarnings("serial")
 public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	transient public String subject;
-	
 	transient public TopicSession topicSession;
 	transient Topic topic;
 	transient TopicSubscriber topicSubscriber;
 	transient TextMessage message;
-	// String stockQuoteText;
 	StockIdentifier s;
-	// transient SubListener listener;
 	
 	
 	transient String subTopic;
@@ -74,29 +71,20 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	private void createTopic() throws JMSException {
 		topic = topicSession.createTopic(subject);
 		topicSubscriber = topicSession.createSubscriber(topic);
-		// message = topicSession.createTextMessage();
 	}
 	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void onMessage(Message msg) {
 		TextMessage textMsg;
 		String temp;
 		
-		// System.out.println("Received something!"+msg);
 		if(msg instanceof TextMessage) {
 			textMsg = (TextMessage) msg;
 			try {
 				temp = textMsg.getText();
-				//System.out.println(temp);
 				parseMessage(temp);
-				//System.out.println(msgContent[0]);
 			} catch (JMSException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			System.out.print(" [Subscriber] "+s.getValue()+"\n\t\t");
@@ -108,65 +96,15 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	public void parseMessage(String msg) {
 		try {
 			msgContent = msg.split(":");
-			//System.out.println(msgContent[0]+"  "+msgContent[1]);
 			currentTime = dateFormat.parse(msgContent[1]);
 			currentQuote = Float.parseFloat(msgContent[0]);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-}
+	public static void main(String[] args) {
 
+	}
 
-/*
- * SubListener
- */
-/*
-@SuppressWarnings("serial")
-class SubListener implements MessageListener, java.io.Serializable {
-	transient String subTopic, temp;
-	transient TextMessage textMsg;
-	transient String[] msgContent;
-	transient SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssz");
-	Date currentTime = new Date();
-	float currentQuote;
-	
-	public SubListener(StockIdentifier s) {
-		subTopic = s.getValue();
-	}
-	// Override interface MessageListener to unblocking receive message
-	@Override
-	public void onMessage(Message msg) {
-		if(msg instanceof TextMessage) {
-			textMsg = (TextMessage) msg;
-			try {
-				temp = textMsg.getText();
-				//System.out.println(temp);
-				parseMessage(temp);
-				//System.out.println(msgContent[0]);
-			} catch (JMSException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.print(" [Subscriber] "+subTopic+"\n\t\t");
-			System.out.printf("%.2f", currentQuote);
-			System.out.println("\t\t| "+currentTime);
-		}
-	}
-	
-	public void parseMessage(String msg) {
-		try {
-			msgContent = msg.split(":");
-			//System.out.println(msgContent[0]+"  "+msgContent[1]);
-			currentTime = dateFormat.parse(msgContent[1]);
-			currentQuote = Float.parseFloat(msgContent[0]);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
 }
-*/
