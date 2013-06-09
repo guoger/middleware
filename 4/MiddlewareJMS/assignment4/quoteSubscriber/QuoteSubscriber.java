@@ -26,6 +26,8 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	Date currentTime;
 	float currentQuote;
 	
+	boolean print = false;
+	
 	
 	/*
 	 * Constructor, accept StockIdentifier and a valid TopicSession
@@ -52,7 +54,7 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 		try {
 			createTopic();
 		} catch (JMSException e) {
-			System.out.println(" [Subscriber]\tInitialization failed!");
+			System.out.println(" [Subscriber] Initialization failed!");
 			e.printStackTrace();
 		}
 		topicSubscriber.setMessageListener(this);
@@ -92,9 +94,11 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 			} catch (JMSException e) {
 				e.printStackTrace();
 			}
-			System.out.print(" [Subscriber] "+s.getValue()+"\n\t\t");
-			System.out.printf("%.2f", currentQuote);
-			System.out.println("\t\t| "+currentTime);
+			if (print) {
+				System.out.print(" [Subscriber] "+s.getValue()+"\n\t\t");
+				System.out.printf("%.2f", currentQuote);
+				System.out.println("\t\t| "+currentTime);
+			}
 		}
 	}
 	

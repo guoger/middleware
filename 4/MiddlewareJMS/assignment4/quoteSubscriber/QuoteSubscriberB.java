@@ -27,6 +27,9 @@ public class QuoteSubscriberB {
 	static TopicConnection topicConn;
 	private static String url = ActiveMQConnection.DEFAULT_BROKER_URL;
 	
+	// Printing hook
+	static boolean print;
+	
 	public QuoteSubscriberB() {
 
 	}
@@ -49,7 +52,7 @@ public class QuoteSubscriberB {
 	 * Load subscribe list from SubscribeList.in file
 	 */
 	private void loadFromIn(String fileName) throws IOException, JMSException {
-		System.out.println(" [Subscriber]\tLoading "+fileName+"......");
+		System.out.println(" [Subscriber] Loading "+fileName+"......");
 		String temp;
 		BufferedReader in =
 				new BufferedReader(new FileReader(fileName));
@@ -70,7 +73,8 @@ public class QuoteSubscriberB {
 			watchList.addElement(quoteSubscriber);
 			quoteSubscriber.setup();
 		}
-		System.out.println(" [Subscriber]\t......Load "+fileName+" successfully!");
+		print = true;
+		System.out.println(" [Subscriber] ......Load "+fileName+" successfully!");
 		in.close();
 	}
 	
@@ -78,8 +82,9 @@ public class QuoteSubscriberB {
 	 * Load watch list from serialized object file
 	 */
 	@SuppressWarnings("unchecked")
-	private void loadFromSer(String fileName) throws IOException, ClassNotFoundException, JMSException {
-		System.out.println(" [Subscriber]\tLoading "+fileName+"......");
+	private void loadFromSer(String fileName) throws
+	IOException, ClassNotFoundException, JMSException {
+		System.out.println(" [Subscriber] Loading "+fileName+"......");
 		FileInputStream fileIn =
 				new FileInputStream(fileName);
 		ObjectInputStream in =
@@ -92,7 +97,8 @@ public class QuoteSubscriberB {
 			q.setup();
 			// System.out.println(q.topicSubscriber);
 		}
-		System.out.println(" [Subscriber]\t......load "+fileName+" successfully!");
+		print = watchList.elementAt(0).print;
+		System.out.println(" [Subscriber] ......load "+fileName+" successfully!");
 		in.close();
 		fileIn.close();
 	}
@@ -110,7 +116,7 @@ public class QuoteSubscriberB {
 		}
 		// Determine whether stock already exists in watch list
 		for (QuoteSubscriber q : watchList) {
-			if (si.equals(q.s)) {
+			if (s.equals(q.s.getValue())) {
 				throw new StockException("Stock exists!");
 			}
 		}
@@ -120,7 +126,26 @@ public class QuoteSubscriberB {
 		// Insert and start a new QuoteSubscriber thread
 		watchList.addElement(quoteSubscriber);
 		quoteSubscriber.setup();
-		System.out.println(" [Subscriber]\tSubscribed "+s);
+		System.out.println(" [Subscriber] Subscribe "+s+" successfully!");
+	}
+	
+	/*
+	 * Unscribe a existing stock
+	 */
+	public static void unsubscribeStock(String s) throws StockException {
+		StockIdentifier si;
+		if (s.startsWith("DE")) {
+			si = new StockID(s);
+		} else {
+			si = new StockName(s);
+		}
+		for (QuoteSubscriber q : watchList) {
+			if (s.equals(q.s.getValue())) {
+				watchList.removeElement(q);
+				return;
+			}
+		}
+		throw new StockException("Stock doesn't exist!");
 	}
 
 	/**
@@ -140,13 +165,14 @@ public class QuoteSubscriberB {
 		String command = "";
 		String userStockIdentifier;
 		
+		
 		Console console = System.console();
 		if (console == null) {
-			System.err.println(" [Subscriber]\tNo console found!");
+			System.err.println(" [Subscriber] No console found!");
 			System.exit(1);
 		}
 		
-		System.out.print("\n");
+		System.out.println("***************************************************\n");
 		
 		
 		/*
@@ -180,29 +206,57 @@ public class QuoteSubscriberB {
 					e.printStackTrace();
 				}
 			} else {
-				System.out.println("Please enter a valid file name, it should end with .ser or .in");
+				try {
+					qb.loadFromSer("watchList.ser");
+					break;
+				} catch (IOException e) {
+					System.out.println("Please enter a valid file name, " +
+							"it should end with .ser or .in");
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (JMSException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
+		
+		System.out.println("***************************************************\n");
 		
 		/*
 		 * Reading command to add/delete stock
 		 * or exit to quit program
 		 */
+		System.out.println("Enter 'add' to subscribe a new stock, " +
+				"'delete' to unsubscribe an exist stock, 'p' to enable/disable " +
+				"stock quote printing, 'exit' to quite.");
 		while (true) {
-			command = console.readLine("Enter 'new' to subscribe a new stock, 'delete' to unsubscribe " +
-					"an exist stock, 'exit' to quite.\n>> ");
-			if (command.equals("new")) {
-				userStockIdentifier = console.readLine("Enter name or ID: ");
+			command = console.readLine("Command>> ");
+			if (command.equals("add")) {
+				userStockIdentifier = console.readLine("Enter name or ID>> ");
 				try {
 					subscribeNewStock(userStockIdentifier);
 				} catch (JMSException e) {
-					System.out.println(" [Subscriber]\tFailed to subscribe a new stock");
+					System.out.println(" [Subscriber] Failed to subscribe a new stock");
 					e.printStackTrace();
 				} catch (StockException e) {
-					System.out.println(" [Subscriber]\tException: "+e.getError());
+					System.out.println(" [Subscriber] Exception: "+e.getError());
 				}
 			} else if (command.equals("delete")) {
-				userStockIdentifier = console.readLine("Enter name or ID: ");
+				userStockIdentifier = console.readLine("Enter name or ID>> ");
+				try {
+					unsubscribeStock(userStockIdentifier);
+				} catch (StockException e) {
+					System.out.println(" [Subscriber] Exception: "+e.getError());
+				}
+			} else if (command.equals("p")) {
+				for (QuoteSubscriber q : watchList) {
+					q.print = !q.print;
+				}
+				print = !print;
+				System.out.println(" [Subscriber] "+(print?"Start":"Stop")+" printing!");
 			} else if (command.equals("exit")) {
 				break;
 			} else {
@@ -210,6 +264,8 @@ public class QuoteSubscriberB {
 			}
 		}
 		
+		
+		System.out.println("***************************************************\n");
 		// Close topic session and connection
 		try {
 			stockSubscribeSession.close();
@@ -218,25 +274,33 @@ public class QuoteSubscriberB {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		System.out.println("TopicSession closed!");
+		System.out.println(" [Subscriber] TopicSession closed!\n");
+		command = console.readLine("Enter the file name that you want to " +
+				"serialize object into\nDefault: watchList.ser\n" +
+				"NOTE: it should end with .ser\n>> ");
+		// System.out.println(command.toString());
+		
 		// Serialize object into file
-		try {
-			System.out.println("Serializing object...");
-			FileOutputStream fileOut =
-					new FileOutputStream("watchList.ser");
-			ObjectOutputStream out =
-					new ObjectOutputStream(fileOut);
-			out.writeObject(watchList);
-			out.close();
-			fileOut.close();
-			System.out.println("\t...Object serialized!");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		while (true) {
+			try {
+				FileOutputStream fileOut =
+						new FileOutputStream(command);
+				ObjectOutputStream out =
+						new ObjectOutputStream(fileOut);
+				System.out.println(" [Subscriber] Serializing object into "+command+"...");
+				out.writeObject(watchList);
+				out.close();
+				fileOut.close();
+				break;
+			} catch (FileNotFoundException e) {
+				command = "watchList.ser";
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+		System.out.println(" [Subscriber] ...Object serialized successfully!");
+		System.out.println("***************************************************\n");
 		System.out.println("\nBye!");
 		// Exit program
 		System.exit(0);
