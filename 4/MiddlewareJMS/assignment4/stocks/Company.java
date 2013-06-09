@@ -17,6 +17,7 @@ public class Company implements java.io.Serializable {
 	public StockID stockID;
 	public StockQuote stockQuote;
 	public StockTime stockTime;
+	public StockIdentifier stockIdentifier;
 	
 	transient static Random randGen = new Random();
 	
@@ -58,6 +59,20 @@ public class Company implements java.io.Serializable {
 		this.stockID = stockID;
 		this.stockQuote = stockQuote;
 		this.stockTime = stockTime;
+	}
+	
+	public boolean match(StockIdentifier s) {
+		if (s.getValue().equals(this.stockID.getID()) || 
+				s.getValue().equals(this.stockName.getName())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public String getState() {
+		return Float.toString(this.stockQuote.getQuote())+":"
+				+this.stockTime.getTime();
 	}
 
 	public void setQuote(float newQuote) {
