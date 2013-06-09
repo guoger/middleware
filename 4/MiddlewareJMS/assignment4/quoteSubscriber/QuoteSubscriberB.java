@@ -31,6 +31,9 @@ public class QuoteSubscriberB {
 
 	}
 	
+	/*
+	 * Initialize JMS, get TopicSession
+	 */
 	public static TopicSession initializeJMS() throws Exception {
 		/*
 		 * JMS Pub/Sub Initialization, create session used by all topic subscriber.
@@ -65,8 +68,6 @@ public class QuoteSubscriberB {
 					new QuoteSubscriber(stockIdentifier, stockSubscribeSession);
 			// Insert and start a new QuoteSubscriber thread
 			watchList.addElement(quoteSubscriber);
-			quoteSubscriber.s = stockIdentifier;
-			quoteSubscriber.topicSession = stockSubscribeSession;
 			quoteSubscriber.setup();
 		}
 		System.out.println(" [Subscriber]\t......Load "+fileName+" successfully!");
@@ -99,8 +100,27 @@ public class QuoteSubscriberB {
 	/*
 	 * Use stockIdentifier to subscribe a new stock
 	 */
-	private static void subscribeNewStock(String stockIdentifier) {
-		
+	private static void subscribeNewStock(String s) throws JMSException, StockException {
+		// Use s to create stock identifier
+		StockIdentifier si;
+		if (s.startsWith("DE")) {
+			si = new StockID(s);
+		} else {
+			si  = new StockName(s);
+		}
+		// Determine whether stock already exists in watch list
+		for (QuoteSubscriber q : watchList) {
+			if (si.equals(q.s)) {
+				throw new StockException("Stock exists!");
+			}
+		}
+		// Create new StockSubscriber
+		quoteSubscriber =
+				new QuoteSubscriber(si, stockSubscribeSession);
+		// Insert and start a new QuoteSubscriber thread
+		watchList.addElement(quoteSubscriber);
+		quoteSubscriber.setup();
+		System.out.println(" [Subscriber]\tSubscribed "+s);
 	}
 
 	/**
@@ -126,23 +146,12 @@ public class QuoteSubscriberB {
 			System.exit(1);
 		}
 		
-		System.out.print("\n\n");
-		/*
-		try {
-			qb.loadFromSer("watchList.ser");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JMSException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/
+		System.out.print("\n");
 		
-		// Choose load mode .ser/.in
+		
+		/*
+		 * First step, reading console command to load from .in/.ser file
+		 */
 		while (true) {
 			fileName = console.readLine("Enter file name to load watch list: ");
 			if (fileName.endsWith(".in")) {
@@ -175,21 +184,33 @@ public class QuoteSubscriberB {
 			}
 		}
 		
-		// enter command to subscribe/unsubscribe a stock
+		/*
+		 * Reading command to add/delete stock
+		 * or exit to quit program
+		 */
 		while (true) {
 			command = console.readLine("Enter 'new' to subscribe a new stock, 'delete' to unsubscribe " +
 					"an exist stock, 'exit' to quite.\n>> ");
 			if (command.equals("new")) {
 				userStockIdentifier = console.readLine("Enter name or ID: ");
-				subscribeNewStock(command);
+				try {
+					subscribeNewStock(userStockIdentifier);
+				} catch (JMSException e) {
+					System.out.println(" [Subscriber]\tFailed to subscribe a new stock");
+					e.printStackTrace();
+				} catch (StockException e) {
+					System.out.println(" [Subscriber]\tException: "+e.getError());
+				}
 			} else if (command.equals("delete")) {
-				
+				userStockIdentifier = console.readLine("Enter name or ID: ");
 			} else if (command.equals("exit")) {
 				break;
+			} else {
+				System.out.println("Invalid command!");
 			}
 		}
 		
-		// Close topic session
+		// Close topic session and connection
 		try {
 			stockSubscribeSession.close();
 			topicConn.close();

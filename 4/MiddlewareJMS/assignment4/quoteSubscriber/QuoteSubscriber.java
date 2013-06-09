@@ -10,7 +10,7 @@ import javax.naming.*;
 
 import stocks.*;
 
-//@SuppressWarnings("serial")
+@SuppressWarnings("serial")
 public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	transient public String subject;
 	transient public TopicSession topicSession;
@@ -27,7 +27,9 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	float currentQuote;
 	
 	
-	// Construct object by StockName and TopicSession
+	/*
+	 * Constructor, accept StockIdentifier and a valid TopicSession
+	 */
 	public QuoteSubscriber(StockIdentifier si, TopicSession topicSession) {
 		this.s = si;
 		this.subject = s.getValue();
@@ -73,7 +75,10 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 		topicSubscriber = topicSession.createSubscriber(topic);
 	}
 	
-
+	/*
+	 * onMessage, the method registered in JMS, is called when a message is available
+	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
+	 */
 	@Override
 	public void onMessage(Message msg) {
 		TextMessage textMsg;
@@ -93,6 +98,9 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 		}
 	}
 	
+	/*
+	 * Parse String to Date
+	 */
 	public void parseMessage(String msg) {
 		try {
 			msgContent = msg.split(":");
