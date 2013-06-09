@@ -4,10 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.*;
 
-import javax.jms.JMSException;
-import javax.jms.Session;
-import javax.jms.TopicConnection;
-import javax.jms.TopicSession;
+import javax.jms.*;
 
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -15,7 +12,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import stocks.*;
 
 
-public class QuotePublisherA {
+public class QuotePublisherA implements MessageListener {
 
 	// args
 	static int i;
@@ -28,6 +25,9 @@ public class QuotePublisherA {
 	static TopicSession stockPublishSession = null;
 	static TopicConnection topicConn;
 	
+	// For request/reply
+	static String request = "client.request";
+	MessageProducer replyProducer;
 	
 	// Using default url of JMS, which is localhost
 	private static String url = ActiveMQConnection.DEFAULT_BROKER_URL;
@@ -41,7 +41,6 @@ public class QuotePublisherA {
 		dax = new DAX();
 		daxCompanies = dax.establish();
 		daxSize = daxCompanies.size();
-		//stockPublishSession = null;
 		/*
 		 * Initialize TopicConnectionFactory, TopicConnection and TopicSession
 		 * A valid TopicSession should be available after successful execution
@@ -59,12 +58,32 @@ public class QuotePublisherA {
 			quoteRefreshThreads.addElement(quoteRefresh);
 			quoteRefresh.start();
 		}
+		/*
+		 * For request/reply
+		 */
+		try {
+			Destination requestQueue = stockPublishSession.createQueue(request);
+			
+			// Setup a message producer to respond to message from clients
+			// Reply destination will depend on correlation id part of request
+			// Declared in the beginning for onMessage method to call
+			replyProducer = stockPublishSession.createProducer(null);
+			replyProducer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+			
+			// Setup a message consumer to consume messages off of request queue
+			MessageConsumer requestConsumer = stockPublishSession.createConsumer(requestQueue);
+			requestConsumer.setMessageListener(this);
+		} catch (JMSException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
-	/*
+	/* $$$
 	 * Add a new stock
 	 * First check whether the stock already exist, return 1 if it does, otherwise, create it
 	 * and start refreshing and return 0;
+	 * Should use StockException, need to be improved
 	 */
 	private static int addNewStock(String name, String id, float quote) {
 		String tempName, tempID;
@@ -82,6 +101,10 @@ public class QuotePublisherA {
 		return 0;
 	}
 	
+	/* $$$
+	 * To removeStock
+	 * Should use StockException, need to be improved
+	 */
 	@SuppressWarnings("deprecation")
 	private static int removeStock(String i) {
 		for (QuoteRefresh c : quoteRefreshThreads) {
@@ -114,8 +137,51 @@ public class QuotePublisherA {
 		return topicSess;
 	}
 
+	/*
+	 * For consuming request
+	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
+	 */
+	@Override
+	public void onMessage(Message message) {
+		try {
+			TextMessage response = stockPublishSession.createTextMessage();
+			if (message instanceof TextMessage) {
+				TextMessage txtMsg = (TextMessage) message;
+				String messageText = txtMsg.getText();
+				response.setText(responseMsg(messageText));
+			}
+			
+			// Set the correlation ID from the received message to be the correlation ID
+			// of the response message. this lets the client identify which message this is
+			// a response to
+			response.setJMSCorrelationID(message.getJMSCorrelationID());
+			// Send the response to the Destination specified by the JMSReplyTo field of the received message
+			// this is presumably a temporary queue created by the client
+			this.replyProducer.send(message.getJMSReplyTo(), response);
+		} catch (JMSException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
-
+	/*
+	 * Traverse daxCompanies to find corresponding company to setup respond message
+	 */
+	public String responseMsg(String txtMsg) {
+		StockIdentifier s;
+		if (txtMsg.startsWith("DE")) {
+			s = new StockID(txtMsg);
+		} else {
+			s = new StockName(txtMsg);
+		}
+		for (Company c : daxCompanies) {
+			if (c.match(s)) {
+				return c.getState();
+			}
+		}
+		// No stock found, return "0", indicating invalid stock
+		return "0";
+	}
 	/**
 	 * @param args
 	 */
@@ -284,8 +350,7 @@ class QuoteRefresh extends Thread {
 		//System.out.println("\t"+companyToPublish.stockName.getName()+"\n\t"+
 		//		companyToPublish.stockID.getID()+"\t"+
 		//		tempQuote);
-		publishQuoteByName.publishContent(Float.toString(tempQuote)+":"
-				+companyToPublish.getStockTime());
+		publishQuoteByName.publishContent(companyToPublish.getState());
 		publishQuoteByID.publishContent(Float.toString(tempQuote)+":"
 				+companyToPublish.getStockTime());
 	}
