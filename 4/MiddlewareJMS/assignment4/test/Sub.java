@@ -36,11 +36,14 @@ public class Sub {
 		Topic topic = topicSession.createTopic("adidas AG");
 		// TopicPublisher topicPublisher = topicSession.createPublisher(topic);
 		TopicSubscriber topicSubscriber = topicSession.createSubscriber(topic);
+		String selector = "quote > 12";
+		TopicSubscriber a = topicSession.createSubscriber(topic, selector, false);
 		// TextMessage msg = topicSession.createTextMessage();
 		// msg.setText("First!");
 		
 		// TopicListener topicListener = new TextListener();
 		Listener listener = new Listener();
+		a.setMessageListener(listener);
 		topicSubscriber.setMessageListener(listener);
 		System.out.println("I'm not blocking!");
 	}
@@ -51,6 +54,7 @@ class Listener implements MessageListener {
 
 	@Override
 	public void onMessage(Message msg) {
+		System.out.println(msg);
 		if(msg instanceof TextMessage) {
 			TextMessage textMsg = (TextMessage) msg;
 			try {

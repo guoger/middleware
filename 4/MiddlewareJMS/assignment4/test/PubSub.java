@@ -41,6 +41,7 @@ public class PubSub {
 		TopicPublisher topicPublisher = topicSession.createPublisher(topic);
 		TextMessage msg = topicSession.createTextMessage();
 		msg.setText("First!");
+		msg.setFloatProperty("quote", (float) 11.2);
 		topicPublisher.publish(msg);
 		System.out.println("Publish message!");
 	}
