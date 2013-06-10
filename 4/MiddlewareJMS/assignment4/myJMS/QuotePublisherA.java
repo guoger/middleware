@@ -104,22 +104,23 @@ public class QuotePublisherA implements MessageListener {
 		return 0;
 	}
 	
-	/* $$$
+	/*
 	 * To removeStock
-	 * Should use StockException, need to be improved
+	 * Throw StockException if cannot find stock
 	 */
 	@SuppressWarnings("deprecation")
-	private static int removeStock(String i) {
+	private static void removeStock(String i) throws StockException {
 		for (QuoteRefresh c : quoteRefreshThreads) {
 			String s1 = c.company.name;
 			String s2 = c.company.id;
 			if (s1.equals(i) || s2.equals(i)) {
 				c.stop();
 				quoteRefreshThreads.removeElement(c);
-				return dax.removeCompany(i);
+				System.out.println(" [Subscriber] Remove stock successfully!");
+				return;
 			}
 		}
-		return 1;
+		throw new StockException("Cannot find stock!");
 	}
 	
 	/*
@@ -227,10 +228,10 @@ public class QuotePublisherA implements MessageListener {
 				}
 			} else if (command.equals("delete")) {
 				userStockIdentifier = console.readLine("To delete a stock, please input stock name or ID: ");
-				if (removeStock(userStockIdentifier) == 1) {
-					System.out.println(" [Publisher]\tStock does not exists!");
-				} else {
-					System.out.println(" [Publisher]\tSuccessfully delete stock!");
+				try {
+					removeStock(userStockIdentifier);
+				} catch (StockException e) {
+					System.out.println(" [Subscriber] "+e.getError());
 				}
 			} else if (command.equals("exit")) {
 				break;
@@ -364,9 +365,8 @@ class QuoteRefresh extends Thread {
 		//System.out.println("\t"+companyToPublish.stockName.getName()+"\n\t"+
 		//		companyToPublish.stockID.getID()+"\t"+
 		//		tempQuote);
-		publishQuoteByName.publishContent(companyToPublish.getState());
-		publishQuoteByID.publishContent(Float.toString(tempQuote)+":"
-				+companyToPublish.getStockTime());
+		publishQuoteByName.publishContent(tempQuote, companyToPublish.getState());
+		publishQuoteByID.publishContent(tempQuote, companyToPublish.getState());
 	}
 	
 	

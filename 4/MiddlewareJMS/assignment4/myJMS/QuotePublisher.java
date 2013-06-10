@@ -38,12 +38,13 @@ public class QuotePublisher {
 		message = topicSession.createTextMessage();
 	}
 	
-	public void publishContent(String content) throws JMSException {
+	public void publishContent(float quote, String content) throws JMSException {
 		/*
 		 * Without using JNDI lookup
 		 */
 		// Set message context
 		message.setText(content);
+		message.setFloatProperty("quote", quote);
 		topicPublisher.publish(message);
 		/*
 		 * Print out quote change
@@ -57,7 +58,7 @@ public class QuotePublisher {
 		StockName stockName = new StockName("adidas AG");
 		StockQuote stockQuote = new StockQuote((float) 11.5);
 		QuotePublisher quotePublisher = new QuotePublisher(stockName, topicSession);
-		quotePublisher.publishContent("Hello, world!");
+		quotePublisher.publishContent((float)11.2, "Hello, world!");
 		topicSession.close();
 	}
 
