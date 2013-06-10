@@ -23,12 +23,17 @@ public class QuoteSubscriberB {
 	
 	// JMS tools
 	static TopicSession stockSubscribeSession;
+	static QueueSession stockInitSession;
 	static QuoteSubscriber quoteSubscriber;
 	static TopicConnection topicConn;
+	static QueueConnection queueConn;
 	private static String url = ActiveMQConnection.DEFAULT_BROKER_URL;
 	
 	// Printing hook
-	static boolean print;
+	static boolean print = true;
+	
+	static int initTimeOut = 1000;
+	
 	
 	public QuoteSubscriberB() {
 
@@ -48,11 +53,19 @@ public class QuoteSubscriberB {
 		return topicSess;
 	}
 	
+	public static QueueSession initializeQueueJMS() throws JMSException {
+		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
+		queueConn = connectionFactory.createQueueConnection();
+		queueConn.start();
+		QueueSession queueSess = queueConn.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+		return queueSess;
+	}
+	
 	/*
 	 * Load subscribe list from SubscribeList.in file
 	 */
-	private void loadFromIn(String fileName) throws IOException, JMSException {
-		System.out.println(" [Subscriber] Loading "+fileName+"......");
+	private void loadFromIn(String fileName) throws JMSException, FileNotFoundException, IOException {
+		System.out.print(" [Subscriber] Loading "+fileName+"...");
 		String temp;
 		BufferedReader in =
 				new BufferedReader(new FileReader(fileName));
@@ -68,14 +81,16 @@ public class QuoteSubscriberB {
 				stockIdentifier = new StockName(temp);
 			}
 			quoteSubscriber =
-					new QuoteSubscriber(stockIdentifier, stockSubscribeSession);
+					new QuoteSubscriber(stockIdentifier, stockSubscribeSession, stockInitSession);
+			quoteSubscriber.print = true;
 			// Insert and start a new QuoteSubscriber thread
 			watchList.addElement(quoteSubscriber);
-			quoteSubscriber.setup();
+			// quoteSubscriber.setup();
 		}
-		print = true;
-		System.out.println(" [Subscriber] ......Load "+fileName+" successfully!");
 		in.close();
+		System.out.print("...Successfully!\n");
+		// Fast initialization
+		this.start();
 	}
 	
 	/*
@@ -93,14 +108,51 @@ public class QuoteSubscriberB {
 		for (QuoteSubscriber q : watchList) {
 			// q.dateFormat = new SimpleDateFormat("yyyyMMddHHmmssz");
 			q.topicSession = stockSubscribeSession;
+			q.queueSession = stockInitSession;
+			q.print = true;
 			// System.out.println(q.topicSubscriber);
-			q.setup();
+			
 			// System.out.println(q.topicSubscriber);
 		}
-		print = watchList.elementAt(0).print;
+		
 		System.out.println(" [Subscriber] ......load "+fileName+" successfully!");
 		in.close();
 		fileIn.close();
+		this.start();
+	}
+	
+	private void start() throws JMSException {
+		System.out.println(" [Subscriber] Fast initialization...");
+		for (QuoteSubscriber q : watchList) {
+			q.fastInit();
+		}
+		
+		// wait for initialization finished
+		try {
+			Thread.sleep(initTimeOut);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		/*$$$
+		 * Another way to test initialization
+		 * Need to improve
+		 */
+		for (QuoteSubscriber q : watchList) {
+			// System.out.println(q.init);
+			if (!q.init) {
+				System.out.println(" [Subscriber] initialize "+q.subject+" timeout!");
+			}
+		}
+		System.out.println(" [Subscriber] ...initialization finished!");
+		
+		for (QuoteSubscriber q : watchList) {
+			q.setup();
+		}
+		
+		print = false;
 	}
 	
 	/*
@@ -122,11 +174,22 @@ public class QuoteSubscriberB {
 		}
 		// Create new StockSubscriber
 		quoteSubscriber =
-				new QuoteSubscriber(si, stockSubscribeSession);
+				new QuoteSubscriber(si, stockSubscribeSession, stockInitSession);
 		// Insert and start a new QuoteSubscriber thread
 		watchList.addElement(quoteSubscriber);
+		quoteSubscriber.fastInit();
+		try {
+			Thread.sleep(initTimeOut);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (!quoteSubscriber.init) {
+			System.out.println(" [Subscriber] Subscribe "+s+" failed!");
+		} else {
+			System.out.println(" [Subscriber] Subscribe "+s+" successfully!");
+		}
 		quoteSubscriber.setup();
-		System.out.println(" [Subscriber] Subscribe "+s+" successfully!");
 	}
 	
 	/*
@@ -157,6 +220,7 @@ public class QuoteSubscriberB {
 		//System.out.println("I'm QuoteSubscriberB constructor!!");
 		try {
 			stockSubscribeSession = initializeJMS();
+			stockInitSession = initializeQueueJMS();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -184,8 +248,10 @@ public class QuoteSubscriberB {
 				try {
 					qb.loadFromIn(fileName);
 					break;
+				} catch (FileNotFoundException e) {
+					System.out.print("...not found!");
 				} catch (IOException e) {
-					System.out.println("Load file failed! Please try again!");
+					System.out.println("...failed! Please try again!");
 					//e.printStackTrace();
 				} catch (JMSException e) {
 					System.out.println("JMS setup failed!");
@@ -252,10 +318,10 @@ public class QuoteSubscriberB {
 					System.out.println(" [Subscriber] Exception: "+e.getError());
 				}
 			} else if (command.equals("p")) {
-				for (QuoteSubscriber q : watchList) {
-					q.print = !q.print;
-				}
 				print = !print;
+				for (QuoteSubscriber q : watchList) {
+					q.print = print;
+				}
 				System.out.println(" [Subscriber] "+(print?"Start":"Stop")+" printing!");
 			} else if (command.equals("exit")) {
 				break;
@@ -269,12 +335,14 @@ public class QuoteSubscriberB {
 		// Close topic session and connection
 		try {
 			stockSubscribeSession.close();
+			stockInitSession.close();
 			topicConn.close();
+			queueConn.close();
 		} catch (JMSException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		System.out.println(" [Subscriber] TopicSession closed!\n");
+		System.out.println(" [Subscriber] Connection closed!\n");
 		command = console.readLine("Enter the file name that you want to " +
 				"serialize object into\nDefault: watchList.ser\n" +
 				"NOTE: it should end with .ser\n>> ");
@@ -288,6 +356,11 @@ public class QuoteSubscriberB {
 				ObjectOutputStream out =
 						new ObjectOutputStream(fileOut);
 				System.out.println(" [Subscriber] Serializing object into "+command+"...");
+				for (QuoteSubscriber q : watchList) {
+					System.out.print(" [Subscriber] "+q.getStockIdentifier().getValue()+"\n\t\t");
+					System.out.printf("%.2f", q.currentQuote);
+					System.out.println("\t\t| "+q.currentTime);
+				}
 				out.writeObject(watchList);
 				out.close();
 				fileOut.close();

@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 
 import javax.jms.*;
 import javax.naming.*;
@@ -14,11 +15,13 @@ import stocks.*;
 public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	transient public String subject;
 	transient public TopicSession topicSession;
+	transient public QueueSession queueSession;
 	transient Topic topic;
 	transient TopicSubscriber topicSubscriber;
 	transient TextMessage message;
 	StockIdentifier s;
 	
+	transient static String request = "client.request";
 	
 	transient String subTopic;
 	transient String[] msgContent;
@@ -26,16 +29,19 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	Date currentTime;
 	float currentQuote;
 	
-	boolean print = false;
+	transient boolean print = true;
+	
+	transient boolean init = false;
 	
 	
 	/*
 	 * Constructor, accept StockIdentifier and a valid TopicSession
 	 */
-	public QuoteSubscriber(StockIdentifier si, TopicSession topicSession) {
+	public QuoteSubscriber(StockIdentifier si, TopicSession topicSession, QueueSession queueSession) {
 		this.s = si;
 		this.subject = s.getValue();
 		this.topicSession = topicSession;
+		this.queueSession = queueSession;
 	}
 
 	public StockIdentifier getStockIdentifier() {
@@ -50,14 +56,17 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	 */
 	public void setup() throws JMSException {
 		this.subject = s.getValue();
-		System.out.println(subject);
+		// System.out.println(subject);
 		try {
+			// System.out.println(" [Subscriber] Fast initialize: "+this.subject);
+			// fastInit();
 			createTopic();
 		} catch (JMSException e) {
 			System.out.println(" [Subscriber] Initialization failed!");
 			e.printStackTrace();
 		}
 		topicSubscriber.setMessageListener(this);
+		/*
 		System.out.print("  "+s.getValue()+"\t\t");
 		System.out.printf("%.2f", currentQuote);
 		System.out.print("\t|");
@@ -67,7 +76,39 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 			System.out.print(currentTime);
 		}
 		System.out.print("\n");
+		*/
 	}
+	
+	/*
+	 * Fast initialization
+	 */
+	public void fastInit() throws JMSException {
+		Destination dest = queueSession.createQueue(request);
+		// Create producer to producer request
+		MessageProducer requestProducer = queueSession.createProducer(dest);
+		requestProducer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+		
+		// Create consumer to consume response with temporary queue
+		Destination tempDest = queueSession.createTemporaryQueue();
+		MessageConsumer responseConsumer = queueSession.createConsumer(tempDest);
+		
+		// bind listener to JMS
+		responseConsumer.setMessageListener(this);
+		// Create message to send
+		TextMessage tempTxt = queueSession.createTextMessage();
+		tempTxt.setText(s.getValue());
+		tempTxt.setJMSReplyTo(tempDest);
+		// Set a correlation ID
+		String correlationID = this.createRandomString();
+		tempTxt.setJMSCorrelationID(correlationID);
+		requestProducer.send(tempTxt);
+	}
+	
+	private String createRandomString() {
+        Random random = new Random(System.currentTimeMillis());
+        long randomLong = random.nextLong();
+        return Long.toHexString(randomLong);
+    }
 	
 	/*
 	 * Use topicSession to create topic and topicSubscriber
@@ -85,7 +126,7 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	public void onMessage(Message msg) {
 		TextMessage textMsg;
 		String temp;
-		
+		// System.out.println(msg);
 		if(msg instanceof TextMessage) {
 			textMsg = (TextMessage) msg;
 			try {
@@ -95,10 +136,20 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 				e.printStackTrace();
 			}
 			if (print) {
-				System.out.print(" [Subscriber] "+s.getValue()+"\n\t\t");
+				System.out.print("\n [Subscriber] "+s.getValue()+"\n\t\t");
 				System.out.printf("%.2f", currentQuote);
 				System.out.println("\t\t| "+currentTime);
 			}
+		}
+		try {
+			if (msg.getJMSType() != null && msg.getJMSType().equals("Init")) {
+				// System.out.println(msg);
+				init = true;
+				print = false;
+			}
+		} catch (JMSException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 	
@@ -107,6 +158,7 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	 */
 	public void parseMessage(String msg) {
 		try {
+			//System.out.println(msg);
 			msgContent = msg.split(":");
 			currentTime = dateFormat.parse(msgContent[1]);
 			currentQuote = Float.parseFloat(msgContent[0]);

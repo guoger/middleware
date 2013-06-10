@@ -53,7 +53,7 @@ public class QuotePublisher {
 	}
 
 	public static void main(String[] args) throws Exception {
-		TopicSession topicSession = QuotePublisherA.initializeJMS();
+		TopicSession topicSession = QuotePublisherA.initializeTopicJMS();
 		StockName stockName = new StockName("adidas AG");
 		StockQuote stockQuote = new StockQuote((float) 11.5);
 		QuotePublisher quotePublisher = new QuotePublisher(stockName, topicSession);

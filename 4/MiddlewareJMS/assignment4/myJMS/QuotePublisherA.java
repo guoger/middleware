@@ -23,7 +23,9 @@ public class QuotePublisherA implements MessageListener {
 	
 	// PublishSession
 	static TopicSession stockPublishSession = null;
+	static QueueSession stockInitSession = null;
 	static TopicConnection topicConn;
+	static QueueConnection queueConn;
 	
 	// For request/reply
 	static String request = "client.request";
@@ -47,7 +49,8 @@ public class QuotePublisherA implements MessageListener {
 		 * of Initialization.
 		 */
 		try {
-			stockPublishSession = initializeJMS();
+			stockInitSession = initializeQueueJMS();
+			stockPublishSession = initializeTopicJMS();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			System.out.println(" Initialization failed!!");
@@ -62,16 +65,16 @@ public class QuotePublisherA implements MessageListener {
 		 * For request/reply
 		 */
 		try {
-			Destination requestQueue = stockPublishSession.createQueue(request);
+			Destination requestQueue = stockInitSession.createQueue(request);
 			
 			// Setup a message producer to respond to message from clients
 			// Reply destination will depend on correlation id part of request
 			// Declared in the beginning for onMessage method to call
-			replyProducer = stockPublishSession.createProducer(null);
+			replyProducer = stockInitSession.createProducer(null);
 			replyProducer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 			
 			// Setup a message consumer to consume messages off of request queue
-			MessageConsumer requestConsumer = stockPublishSession.createConsumer(requestQueue);
+			MessageConsumer requestConsumer = stockInitSession.createConsumer(requestQueue);
 			requestConsumer.setMessageListener(this);
 		} catch (JMSException e) {
 			// TODO Auto-generated catch block
@@ -126,7 +129,7 @@ public class QuotePublisherA implements MessageListener {
 	 * 
 	 * Need to be improved later.
 	 */
-	public static TopicSession initializeJMS() throws Exception {
+	public static TopicSession initializeTopicJMS() throws Exception {
 		/*
 		 * JMS Pub/Sub Initialization, create session used by all topic publisher.
 		 */
@@ -136,6 +139,14 @@ public class QuotePublisherA implements MessageListener {
 		TopicSession topicSess = topicConn.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 		return topicSess;
 	}
+	
+	public static QueueSession initializeQueueJMS() throws JMSException {
+		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
+		queueConn = connectionFactory.createQueueConnection();
+		queueConn.start();
+		QueueSession queueSess = queueConn.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+		return queueSess;
+	}
 
 	/*
 	 * For consuming request
@@ -144,7 +155,7 @@ public class QuotePublisherA implements MessageListener {
 	@Override
 	public void onMessage(Message message) {
 		try {
-			TextMessage response = stockPublishSession.createTextMessage();
+			TextMessage response = stockInitSession.createTextMessage();
 			if (message instanceof TextMessage) {
 				TextMessage txtMsg = (TextMessage) message;
 				String messageText = txtMsg.getText();
@@ -155,6 +166,7 @@ public class QuotePublisherA implements MessageListener {
 			// of the response message. this lets the client identify which message this is
 			// a response to
 			response.setJMSCorrelationID(message.getJMSCorrelationID());
+			response.setJMSType("Init");
 			// Send the response to the Destination specified by the JMSReplyTo field of the received message
 			// this is presumably a temporary queue created by the client
 			this.replyProducer.send(message.getJMSReplyTo(), response);
@@ -228,6 +240,8 @@ public class QuotePublisherA implements MessageListener {
 		System.out.println("Closing TopicSession...");
 		try {
 			stockPublishSession.close();
+			stockInitSession.close();
+			queueConn.close();
 			topicConn.close();
 		} catch (JMSException e1) {
 			// TODO Auto-generated catch block
