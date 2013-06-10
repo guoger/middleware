@@ -195,7 +195,7 @@ public class QuoteSubscriberB {
 	/*
 	 * Unscribe a existing stock
 	 */
-	public static void unsubscribeStock(String s) throws StockException {
+	public static void unsubscribeStock(String s) throws StockException, JMSException {
 		StockIdentifier si;
 		if (s.startsWith("DE")) {
 			si = new StockID(s);
@@ -204,6 +204,7 @@ public class QuoteSubscriberB {
 		}
 		for (QuoteSubscriber q : watchList) {
 			if (s.equals(q.s.getValue())) {
+				q.topicSubscriber.close();
 				watchList.removeElement(q);
 				return;
 			}
@@ -316,6 +317,9 @@ public class QuoteSubscriberB {
 					unsubscribeStock(userStockIdentifier);
 				} catch (StockException e) {
 					System.out.println(" [Subscriber] Exception: "+e.getError());
+				} catch (JMSException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			} else if (command.equals("p")) {
 				print = !print;

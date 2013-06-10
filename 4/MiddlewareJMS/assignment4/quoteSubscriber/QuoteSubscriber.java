@@ -16,22 +16,22 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	transient public String subject;
 	transient public TopicSession topicSession;
 	transient public QueueSession queueSession;
-	transient Topic topic;
-	transient TopicSubscriber topicSubscriber;
+	transient public Topic topic;
+	protected transient TopicSubscriber topicSubscriber;
 	transient TextMessage message;
-	StockIdentifier s;
+	public StockIdentifier s;
 	
 	transient static String request = "client.request";
 	
 	transient String subTopic;
 	transient String[] msgContent;
-	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssz");
-	Date currentTime;
-	float currentQuote;
+	public SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssz");
+	public Date currentTime;
+	public float currentQuote;
 	
-	transient boolean print = true;
+	public transient boolean print = true;
 	
-	transient boolean init = false;
+	public transient boolean init = false;
 	
 	
 	/*
@@ -113,7 +113,7 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	/*
 	 * Use topicSession to create topic and topicSubscriber
 	 */
-	private void createTopic() throws JMSException {
+	public void createTopic() throws JMSException {
 		topic = topicSession.createTopic(subject);
 		topicSubscriber = topicSession.createSubscriber(topic);
 	}
