@@ -1,17 +1,20 @@
 package quoteSubMsgSelector;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.*;
 
 import javax.jms.*;
-import javax.naming.*;
 
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import stocks.*;
 
+/*
+ * Basically, QuoteSubMsgSelector is exactly the same as QuoteSubscriberB
+ * The essential change is that in this class, watchList doesn't hold QuoteSubscriber,
+ * but MsgSelector, which is inherited from QuoteSubscriber
+ */
 public class QuoteSubMsgSelector {
 
 	// Vector to hold QuoteSubscriber threads-like objects
@@ -196,12 +199,6 @@ public class QuoteSubMsgSelector {
 	 * Unscribe a existing stock
 	 */
 	public static void unsubscribeStock(String s) throws StockException, JMSException {
-		StockIdentifier si;
-		if (s.startsWith("DE")) {
-			si = new StockID(s);
-		} else {
-			si = new StockName(s);
-		}
 		for (MsgSelector q : watchList) {
 			if (s.equals(q.s.getValue())) {
 				q.topicSubscriber.close();

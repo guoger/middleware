@@ -21,6 +21,7 @@ public class QuotePublisherA implements MessageListener {
 	static QuoteRefresh quoteRefresh;
 	static Company company;
 	
+	
 	// PublishSession
 	static TopicSession stockPublishSession = null;
 	static QueueSession stockInitSession = null;
@@ -29,14 +30,14 @@ public class QuotePublisherA implements MessageListener {
 	
 	// For request/reply
 	static String request = "client.request";
-	MessageProducer replyProducer;
+	private static MessageProducer replyProducer;
 	
 	// Using default url of JMS, which is localhost
 	private static String url = ActiveMQConnection.DEFAULT_BROKER_URL;
 	
 	// Create 2 vector to hold quote Refreshers and Companies;
-	public static Vector<QuoteRefresh> quoteRefreshThreads = new Vector<QuoteRefresh>();
-	public static Vector<Company> daxCompanies;
+	private static Vector<QuoteRefresh> quoteRefreshThreads = new Vector<QuoteRefresh>();
+	private static Vector<Company> daxCompanies;
 	
 	// Constructor of QuotePublisherA
 	public QuotePublisherA() {
@@ -49,8 +50,7 @@ public class QuotePublisherA implements MessageListener {
 		 * of Initialization.
 		 */
 		try {
-			stockInitSession = initializeQueueJMS();
-			stockPublishSession = initializeTopicJMS();
+			initializeJMS();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			System.out.println(" Initialization failed!!");
@@ -82,26 +82,23 @@ public class QuotePublisherA implements MessageListener {
 		}
 	}
 	
-	/* $$$
+	/*
 	 * Add a new stock
-	 * First check whether the stock already exist, return 1 if it does, otherwise, create it
-	 * and start refreshing and return 0;
-	 * Should use StockException, need to be improved
+	 * Throw StockException if the stock already exist
 	 */
-	private static int addNewStock(String name, String id, float quote) {
+	private static void addNewStock(String name, String id, float quote) throws StockException {
 		String tempName, tempID;
 		for (QuoteRefresh c : quoteRefreshThreads) {
 			tempName = c.company.name;
 			tempID = c.company.id;
 			if (tempName.equals(name) || tempID.equals(id)) {
-				return 1;
+				throw new StockException("Stock already exist!");
 			}
 		}
 		Company newCompany = dax.addCompany(name, id, quote);
 		quoteRefresh = new QuoteRefresh(newCompany, stockPublishSession);
 		quoteRefreshThreads.addElement(quoteRefresh);
 		quoteRefresh.start();
-		return 0;
 	}
 	
 	/*
@@ -124,33 +121,25 @@ public class QuotePublisherA implements MessageListener {
 	}
 	
 	/*
-	 * A static method initializing JMS and return a valid TopicSession instance.
-	 * NOTICE: will lost control of TopicConnection, which means TopicConnection.close()
-	 * cannot be invoked!!! Be very careful when using this method!!!
-	 * 
-	 * Need to be improved later.
+	 * 1. Create a new ActiveMQConnectionFactory from url, which is set to ActiveMQConnection.DEFAULT_BROKER_URL
+	 * 2. Use the ConnectionFactory to create a new TopicConnection and a new QueueConnection
+	 * 3. Use Connections to create TopicSession for publishing and QueueSession for initialization
 	 */
-	public static TopicSession initializeTopicJMS() throws Exception {
+	private static void initializeJMS() throws Exception {
 		/*
 		 * JMS Pub/Sub Initialization, create session used by all topic publisher.
 		 */
 		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
 		topicConn = connectionFactory.createTopicConnection();
-		topicConn.start();
-		TopicSession topicSess = topicConn.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-		return topicSess;
-	}
-	
-	public static QueueSession initializeQueueJMS() throws JMSException {
-		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
 		queueConn = connectionFactory.createQueueConnection();
+		topicConn.start();
 		queueConn.start();
-		QueueSession queueSess = queueConn.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-		return queueSess;
+		stockPublishSession = topicConn.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+		stockInitSession = queueConn.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
 	}
 
 	/*
-	 * For consuming request
+	 * Method registered in JMS, fired when a new message is available
 	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
 	 */
 	@Override
@@ -180,7 +169,7 @@ public class QuotePublisherA implements MessageListener {
 	/*
 	 * Traverse daxCompanies to find corresponding company to setup respond message
 	 */
-	public String responseMsg(String txtMsg) {
+	private String responseMsg(String txtMsg) {
 		StockIdentifier s;
 		if (txtMsg.startsWith("DE")) {
 			s = new StockID(txtMsg);
@@ -221,11 +210,10 @@ public class QuotePublisherA implements MessageListener {
 					userStockID = console.readLine("Enter stock ID: ");
 					userStockQuoteTemp = console.readLine("Enter stock price: ");
 					userStockQuote = Float.parseFloat(userStockQuoteTemp);
-					if (addNewStock(userStockName, userStockID, userStockQuote) == 1) {
-						System.out.println(" [Publisher]\tStock already exists!");
-					} else {
-						System.out.println(" [Publisher]\tSuccessfully create stock: "+userStockName+" "+userStockID+
-								"\n\t\t"+userStockQuote+"\n");
+					try {
+						addNewStock(userStockName, userStockID, userStockQuote);
+					} catch (StockException e) {
+						System.out.println(" [Publisher] "+e.getError());
 					}
 				} else if (command.equals("delete")) {
 					userStockIdentifier = console.readLine("To delete a stock, please input stock name or ID: ");
@@ -365,9 +353,6 @@ class QuoteRefresh extends Thread {
 
 	private void publishQuoteToJMS(Company companyToPublish) throws JMSException {
 		float tempQuote = companyToPublish.stockQuote.getQuote();
-		//System.out.println("\t"+companyToPublish.stockName.getName()+"\n\t"+
-		//		companyToPublish.stockID.getID()+"\t"+
-		//		tempQuote);
 		publishQuoteByName.publishContent(tempQuote, companyToPublish.getState());
 		publishQuoteByID.publishContent(tempQuote, companyToPublish.getState());
 	}

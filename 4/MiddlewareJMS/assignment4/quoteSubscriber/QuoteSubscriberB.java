@@ -1,11 +1,9 @@
 package quoteSubscriber;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.*;
 
 import javax.jms.*;
-import javax.naming.*;
 
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -36,29 +34,26 @@ public class QuoteSubscriberB {
 	
 	
 	public QuoteSubscriberB() {
-
+		// constructor
 	}
 	
+	
 	/*
-	 * Initialize JMS, get TopicSession
+	 * 1. Create a new ActiveMQConnectionFactory from URL, which is set to ActiveMQConnection.DEFAULT_BROKER_URL
+	 * 2. Use the ConnectionFactory to create a new TopicConnection and a new QueueConnection
+	 * 3. Use Connections to create TopicSession for subscription and QueueSession for initialization
 	 */
-	public static TopicSession initializeJMS() throws Exception {
+	private static void initializeJMS() throws Exception {
 		/*
-		 * JMS Pub/Sub Initialization, create session used by all topic subscriber.
+		 * JMS Pub/Sub Initialization, create session used by all topic publisher.
 		 */
 		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
 		topicConn = connectionFactory.createTopicConnection();
-		topicConn.start();
-		TopicSession topicSess = topicConn.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-		return topicSess;
-	}
-	
-	public static QueueSession initializeQueueJMS() throws JMSException {
-		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
 		queueConn = connectionFactory.createQueueConnection();
+		topicConn.start();
 		queueConn.start();
-		QueueSession queueSess = queueConn.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-		return queueSess;
+		stockSubscribeSession = topicConn.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+		stockInitSession = queueConn.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
 	}
 	
 	/*
@@ -193,15 +188,9 @@ public class QuoteSubscriberB {
 	}
 	
 	/*
-	 * Unscribe a existing stock
+	 * Unsubscribe a existing stock
 	 */
 	public static void unsubscribeStock(String s) throws StockException, JMSException {
-		StockIdentifier si;
-		if (s.startsWith("DE")) {
-			si = new StockID(s);
-		} else {
-			si = new StockName(s);
-		}
 		for (QuoteSubscriber q : watchList) {
 			if (s.equals(q.s.getValue())) {
 				q.topicSubscriber.close();
@@ -220,8 +209,7 @@ public class QuoteSubscriberB {
 		// Using myJMS initialization to initialize JMS
 		//System.out.println("I'm QuoteSubscriberB constructor!!");
 		try {
-			stockSubscribeSession = initializeJMS();
-			stockInitSession = initializeQueueJMS();
+			initializeJMS();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}

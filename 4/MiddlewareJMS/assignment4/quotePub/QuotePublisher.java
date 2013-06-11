@@ -38,7 +38,7 @@ public class QuotePublisher {
 		message = topicSession.createTextMessage();
 	}
 	
-	public void publishContent(float quote, String content) throws JMSException {
+	protected void publishContent(float quote, String content) throws JMSException {
 		/*
 		 * Without using JNDI lookup
 		 */
@@ -54,12 +54,7 @@ public class QuotePublisher {
 	}
 
 	public static void main(String[] args) throws Exception {
-		TopicSession topicSession = QuotePublisherA.initializeTopicJMS();
-		StockName stockName = new StockName("adidas AG");
-		StockQuote stockQuote = new StockQuote((float) 11.5);
-		QuotePublisher quotePublisher = new QuotePublisher(stockName, topicSession);
-		quotePublisher.publishContent((float)11.2, "Hello, world!");
-		topicSession.close();
+		
 	}
 
 }
