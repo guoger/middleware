@@ -1,4 +1,4 @@
-package myJMS;
+package quotePub;
 
 import javax.jms.*;
 

@@ -1,4 +1,4 @@
-package myJMS;
+package quotePub;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
