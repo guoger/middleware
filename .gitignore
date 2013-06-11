@@ -11,4 +11,7 @@
 
 
 # object serialization file #
-.ser
+*.ser
+
+# log file #
+*.log
