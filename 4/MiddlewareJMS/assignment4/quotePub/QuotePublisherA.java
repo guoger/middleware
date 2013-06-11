@@ -207,102 +207,105 @@ public class QuotePublisherA implements MessageListener {
 		float userStockQuote;
 		Console console = System.console();
 		if (console == null) {
-			System.err.println("No console found.");
-			System.exit(1);
-		}
-		System.out.println("\n\n");
-		while (true) {
-			command = console.readLine("Enter 'new' to create stock, 'delete' to remove stock or 'exit' to quit: ");
-			
-			if (command.equals("new")) {
-				// System.out.println("To create a new stock, please input info......");
-				userStockName = console.readLine("Enter stock name: ");
-				userStockID = console.readLine("Enter stock ID: ");
-				userStockQuoteTemp = console.readLine("Enter stock price: ");
-				userStockQuote = Float.parseFloat(userStockQuoteTemp);
-				if (addNewStock(userStockName, userStockID, userStockQuote) == 1) {
-					System.out.println(" [Publisher]\tStock already exists!");
-				} else {
-					System.out.println(" [Publisher]\tSuccessfully create stock: "+userStockName+" "+userStockID+
-							"\n\t\t"+userStockQuote+"\n");
+			System.err.println("No console found, entering autonomy mode.");
+			// System.exit(1);
+		} else {
+			dax.printDAX();
+			System.out.println("\n");
+			while (true) {
+				command = console.readLine("Enter 'new' to create stock, 'delete' to remove stock or 'exit' to quit: ");
+				
+				if (command.equals("new")) {
+					// System.out.println("To create a new stock, please input info......");
+					userStockName = console.readLine("Enter stock name: ");
+					userStockID = console.readLine("Enter stock ID: ");
+					userStockQuoteTemp = console.readLine("Enter stock price: ");
+					userStockQuote = Float.parseFloat(userStockQuoteTemp);
+					if (addNewStock(userStockName, userStockID, userStockQuote) == 1) {
+						System.out.println(" [Publisher]\tStock already exists!");
+					} else {
+						System.out.println(" [Publisher]\tSuccessfully create stock: "+userStockName+" "+userStockID+
+								"\n\t\t"+userStockQuote+"\n");
+					}
+				} else if (command.equals("delete")) {
+					userStockIdentifier = console.readLine("To delete a stock, please input stock name or ID: ");
+					try {
+						removeStock(userStockIdentifier);
+					} catch (StockException e) {
+						System.out.println(" [Subscriber] "+e.getError());
+					}
+				} else if (command.equals("exit")) {
+					break;
 				}
-			} else if (command.equals("delete")) {
-				userStockIdentifier = console.readLine("To delete a stock, please input stock name or ID: ");
-				try {
-					removeStock(userStockIdentifier);
-				} catch (StockException e) {
-					System.out.println(" [Subscriber] "+e.getError());
-				}
-			} else if (command.equals("exit")) {
-				break;
 			}
+			
+			System.out.println("Closing TopicSession...");
+			try {
+				stockPublishSession.close();
+				stockInitSession.close();
+				queueConn.close();
+				topicConn.close();
+			} catch (JMSException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			
+			// Serializing DAX
+			System.out.println(" [Publisher]\tStoring DAX......");
+			try {
+				FileOutputStream fileOut =
+						new FileOutputStream("DAX.der");
+				ObjectOutputStream out =
+						new ObjectOutputStream(fileOut);
+				out.writeObject(dax);
+				out.close();
+				fileOut.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println(" [Publisher]\t......complete!");
+			
+			/*
+			 * For debugging serialization.
+			 * Read out DAX.der and print exit state
+			 */
+			try {
+				FileInputStream fileIn =
+						new FileInputStream("DAX.der");
+				ObjectInputStream in =
+						new ObjectInputStream(fileIn);
+				dax = (DAX) in.readObject();
+				in.close();
+				fileIn.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return;
+			}
+			dax.printDAX();
+			System.out.println("\nBye!");
+			System.exit(0);
 		}
-		
-		System.out.println("Closing TopicSession...");
-		try {
-			stockPublishSession.close();
-			stockInitSession.close();
-			queueConn.close();
-			topicConn.close();
-		} catch (JMSException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		
-		// Serializing DAX
-		System.out.println(" [Publisher]\tStoring DAX......");
-		try {
-			FileOutputStream fileOut =
-					new FileOutputStream("DAX.der");
-			ObjectOutputStream out =
-					new ObjectOutputStream(fileOut);
-			out.writeObject(dax);
-			out.close();
-			fileOut.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println(" [Publisher]\t......complete!");
-		
-		/*
-		 * For debugging serialization.
-		 * Read out DAX.der and print exit state
-		 */
-		try {
-			FileInputStream fileIn =
-					new FileInputStream("DAX.der");
-			ObjectInputStream in =
-					new ObjectInputStream(fileIn);
-			dax = (DAX) in.readObject();
-			in.close();
-			fileIn.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-		dax.printDAX();
-		System.out.println("\nBye!");
-		System.exit(0);
 	}
 	
 }
 
 
 /*
+ *************************************************************************
  * Every thread will hold a stock. Change the quote randomly (5 to 15 sec)
  * And then publish it to respective topic.
  * Time stamp included

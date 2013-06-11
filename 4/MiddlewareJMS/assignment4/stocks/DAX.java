@@ -30,7 +30,7 @@ public class DAX implements java.io.Serializable {
 	}
 	
 	public Vector<Company> establish() {
-		System.out.println(" [DAX]\tEstablishing DAX......\n");
+		System.out.println(" [DAX]\tEstablishing DAX......");
 		daxCompanies = new Vector<Company>();
 		// The timeStamp of initialization
 		tempTime = timeStamp.format(Calendar.getInstance().getTime());
@@ -43,14 +43,14 @@ public class DAX implements java.io.Serializable {
 		        quote = Float.parseFloat(in.readLine());
 		        company = new Company(stockName, stockID, quote, tempTime);
 		        daxCompanies.addElement(company);
-		        System.out.println(" [DAX]\t"+stockName+" "+stockID+"\n\t"
-		        		+quote+" | "+tempTime);
+		        //System.out.println(" [DAX]\t"+stockName+" "+stockID+"\n\t"
+		        //		+quote+" | "+tempTime);
 	        }
 	        in.close();
 	    } catch(Exception ex) {
 	    	ex.printStackTrace();
 	    }
-		System.out.println("\n [DAX]\t......Establishment complete!\n");
+		System.out.println(" [DAX]\t......Establishment complete!\n");
 		daxSize = daxCompanies.size();
 		return daxCompanies;
 	}
@@ -76,8 +76,11 @@ public class DAX implements java.io.Serializable {
 		System.out.println("\n [DAX]\tPrinting out DAX:\n");
 		System.out.println("*****************************");
 		for (Company s : daxCompanies) {
-			System.out.println(" [DAX]\t"+s.name+" "+s.id+"\n\t"
-	        		+s.quote+" | "+s.time);
+			//System.out.println(" [DAX]\t"+s.name+" "+s.id+"\n\t"
+	        //		+s.quote+" | "+s.time);
+			System.out.println(" [DAX] "+s.name);
+			System.out.printf("\t%.2f", s.quote);
+			System.out.print(" | "+s.time+"\n");
 		}
 		System.out.println("*****************************");
 	}

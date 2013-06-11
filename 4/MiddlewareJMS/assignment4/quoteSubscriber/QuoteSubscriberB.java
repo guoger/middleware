@@ -244,7 +244,7 @@ public class QuoteSubscriberB {
 		 * First step, reading console command to load from .in/.ser file
 		 */
 		while (true) {
-			fileName = console.readLine("Enter file name to load watch list: ");
+			fileName = console.readLine("Enter file name to load watch list (e.g. sub.in): ");
 			if (fileName.endsWith(".in")) {
 				try {
 					qb.loadFromIn(fileName);
