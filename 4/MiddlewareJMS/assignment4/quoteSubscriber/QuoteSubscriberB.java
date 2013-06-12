@@ -38,10 +38,10 @@ public class QuoteSubscriberB {
 	}
 	
 	
-	/*
-	 * 1. Create a new ActiveMQConnectionFactory from URL, which is set to ActiveMQConnection.DEFAULT_BROKER_URL
-	 * 2. Use the ConnectionFactory to create a new TopicConnection and a new QueueConnection
-	 * 3. Use Connections to create TopicSession for subscription and QueueSession for initialization
+	/**
+	 * <p>1. Create a new ActiveMQConnectionFactory from URL, which is set to ActiveMQConnection.DEFAULT_BROKER_URL
+	 * <p>2. Use the ConnectionFactory to create a new TopicConnection and a new QueueConnection
+	 * <p>3. Use Connections to create TopicSession for subscription and QueueSession for initialization
 	 */
 	private static void initializeJMS() throws Exception {
 		/*
@@ -56,19 +56,18 @@ public class QuoteSubscriberB {
 		stockInitSession = queueConn.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
 	}
 	
-	/*
+	/**
 	 * Load subscribe list from SubscribeList.in file
+	 * Reading from SubscribeList.in file line by line until null found
+	 * Determine whether it is a stock name or ID, using it to create new
+	 * QuoteSubscriber instance.
 	 */
 	private void loadFromIn(String fileName) throws JMSException, FileNotFoundException, IOException {
 		System.out.print(" [Subscriber] Loading "+fileName+"...");
 		String temp;
 		BufferedReader in =
-				new BufferedReader(new FileReader(fileName));
-		/*
-		 * Reading from SubscribeList.in file line by line until null found
-		 * Determine whether it is a stock name or ID, using it to create new
-		 * QuoteSubscriber instance.
-		 */
+		new BufferedReader(new FileReader(fileName));
+		
 		while((temp = in.readLine()) != null) {
 			if(temp.startsWith("DE")) {
 				stockIdentifier = new StockID(temp);
@@ -88,7 +87,7 @@ public class QuoteSubscriberB {
 		this.start();
 	}
 	
-	/*
+	/**
 	 * Load watch list from serialized object file
 	 */
 	@SuppressWarnings("unchecked")
@@ -131,7 +130,7 @@ public class QuoteSubscriberB {
 		}
 		
 		
-		/*$$$
+		/*
 		 * Another way to test initialization
 		 * Need to improve
 		 */
@@ -150,7 +149,7 @@ public class QuoteSubscriberB {
 		print = false;
 	}
 	
-	/*
+	/**
 	 * Use stockIdentifier to subscribe a new stock
 	 */
 	private static void subscribeNewStock(String s) throws JMSException, StockException {
@@ -187,8 +186,8 @@ public class QuoteSubscriberB {
 		quoteSubscriber.setup();
 	}
 	
-	/*
-	 * Unsubscribe a existing stock
+	/**
+	 * cancel subscription of an existing stock
 	 */
 	public static void unsubscribeStock(String s) throws StockException, JMSException {
 		for (QuoteSubscriber q : watchList) {
@@ -201,9 +200,6 @@ public class QuoteSubscriberB {
 		throw new StockException("Stock doesn't exist!");
 	}
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		QuoteSubscriberB qb = new QuoteSubscriberB();
 		// Using myJMS initialization to initialize JMS

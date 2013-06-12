@@ -10,7 +10,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 import stocks.*;
 
-/*
+/**
  * Basically, QuoteSubMsgSelector is exactly the same as QuoteSubscriberB
  * The essential change is that in this class, watchList doesn't hold QuoteSubscriber,
  * but MsgSelector, which is inherited from QuoteSubscriber
@@ -30,6 +30,8 @@ public class QuoteSubMsgSelector {
 	static MsgSelector quoteSubscriber;
 	static TopicConnection topicConn;
 	static QueueConnection queueConn;
+	static TopicSession topicSess;
+	static QueueSession queueSess;
 	private static String url = ActiveMQConnection.DEFAULT_BROKER_URL;
 	
 	// Printing hook
@@ -42,41 +44,32 @@ public class QuoteSubMsgSelector {
 
 	}
 	
-	/*
-	 * Initialize JMS, get TopicSession
+	/**
+	 * Initialize JMS, get TopicSession and QueueSession, which is used by all TopicSubscriber
+	 * and QueueSubscriber
 	 */
-	public static TopicSession initializeJMS() throws Exception {
-		/*
-		 * JMS Pub/Sub Initialization, create session used by all topic subscriber.
-		 */
+	private static void initializeJMS() throws Exception {
 		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
 		topicConn = connectionFactory.createTopicConnection();
 		topicConn.start();
-		TopicSession topicSess = topicConn.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-		return topicSess;
-	}
-	
-	public static QueueSession initializeQueueJMS() throws JMSException {
-		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
 		queueConn = connectionFactory.createQueueConnection();
 		queueConn.start();
-		QueueSession queueSess = queueConn.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-		return queueSess;
+		topicSess = topicConn.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+		queueSess = queueConn.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
 	}
 	
-	/*
+	/**
 	 * Load subscribe list from SubscribeList.in file
+	 * Reading from SubscribeList.in file line by line until null found
+	 * Determine whether it is a stock name or ID, using it to create new
+	 * MsgSelector instance.
 	 */
 	private void loadFromIn(String fileName) throws JMSException, FileNotFoundException, IOException {
 		System.out.print(" [Subscriber] Loading "+fileName+"...");
 		String temp;
 		BufferedReader in =
-				new BufferedReader(new FileReader(fileName));
-		/*
-		 * Reading from SubscribeList.in file line by line until null found
-		 * Determine whether it is a stock name or ID, using it to create new
-		 * MsgSelector instance.
-		 */
+		new BufferedReader(new FileReader(fileName));
+
 		while((temp = in.readLine()) != null) {
 			if(temp.startsWith("DE")) {
 				stockIdentifier = new StockID(temp);
@@ -96,7 +89,7 @@ public class QuoteSubMsgSelector {
 		this.start();
 	}
 	
-	/*
+	/**
 	 * Load watch list from serialized object file
 	 */
 	@SuppressWarnings("unchecked")
@@ -124,6 +117,11 @@ public class QuoteSubMsgSelector {
 		this.start();
 	}
 	
+	/**
+	 * Firstly, invoke MsgSelector method fastInit() to initialize stock 
+	 * quote using request/reply queue/temporary queue. Then, invoke MsgSelector
+	 * method setup() to actually subscribe to the topic
+	 */
 	private void start() throws JMSException {
 		System.out.println(" [Subscriber] Fast initialization...");
 		for (MsgSelector q : watchList) {
@@ -139,7 +137,7 @@ public class QuoteSubMsgSelector {
 		}
 		
 		
-		/*$$$
+		/*
 		 * Another way to test initialization
 		 * Need to improve
 		 */
@@ -158,7 +156,7 @@ public class QuoteSubMsgSelector {
 		// print = false;
 	}
 	
-	/*
+	/**
 	 * Use stockIdentifier to subscribe a new stock
 	 */
 	private static void subscribeNewStock(String s) throws JMSException, StockException {
@@ -195,10 +193,10 @@ public class QuoteSubMsgSelector {
 		quoteSubscriber.setup();
 	}
 	
-	/*
-	 * Unscribe a existing stock
+	/**
+	 * cancel subscription of an existing stock
 	 */
-	public static void unsubscribeStock(String s) throws StockException, JMSException {
+	private static void unsubscribeStock(String s) throws StockException, JMSException {
 		for (MsgSelector q : watchList) {
 			if (s.equals(q.s.getValue())) {
 				q.topicSubscriber.close();
@@ -210,15 +208,19 @@ public class QuoteSubMsgSelector {
 	}
 
 	/**
-	 * @param args
+	 * TODO list:
+	 * <p>initialize JMS
+	 * <p>consume a file name out of which subscription list is extracted, can be .ser/.in
+	 * <p>block reading command: add/delete or exit;
+	 * <p>serialize watchList into a file specified by user;
+	 * <p>exit program
 	 */
 	public static void main(String[] args) {
 		QuoteSubMsgSelector qb = new QuoteSubMsgSelector();
 		// Using myJMS initialization to initialize JMS
 		//System.out.println("I'm QuoteSubscriberB constructor!!");
 		try {
-			stockSubscribeSession = initializeJMS();
-			stockInitSession = initializeQueueJMS();
+			initializeJMS();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
