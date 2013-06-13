@@ -11,13 +11,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 import stocks.*;
 
-/**
- * General quote publisher
- * <p>Initialize stock market DAX from DAX.in file and instantiate companies to Company objects
- * <p>Refresh every company stock quote over time independently, range from 5 to 15 seconds
- * <p>Publish quote to JMS
- * <p>User can use command add/delete to create/remove a stock
- */
+
 public class QuotePublisherA implements MessageListener {
 
 	// args
@@ -45,13 +39,16 @@ public class QuotePublisherA implements MessageListener {
 	private static Vector<QuoteRefresh> quoteRefreshThreads = new Vector<QuoteRefresh>();
 	private static Vector<Company> daxCompanies;
 	
-	/**
-	 * Initialize DAX and JMS, instantiate Company, create request/reply queue and setup message listener
-	 */
+	// Constructor of QuotePublisherA
 	public QuotePublisherA() {
 		dax = new DAX();
 		daxCompanies = dax.establish();
 		daxSize = daxCompanies.size();
+		/*
+		 * Initialize TopicConnectionFactory, TopicConnection and TopicSession
+		 * A valid TopicSession should be available after successful execution
+		 * of Initialization.
+		 */
 		try {
 			initializeJMS();
 		} catch (Exception e) {
@@ -85,7 +82,7 @@ public class QuotePublisherA implements MessageListener {
 		}
 	}
 	
-	/**
+	/*
 	 * Add a new stock
 	 * Throw StockException if the stock already exist
 	 */
@@ -104,8 +101,8 @@ public class QuotePublisherA implements MessageListener {
 		quoteRefresh.start();
 	}
 	
-	/**
-	 * To remove stock
+	/*
+	 * To removeStock
 	 * Throw StockException if cannot find stock
 	 */
 	@SuppressWarnings("deprecation")
@@ -123,12 +120,15 @@ public class QuotePublisherA implements MessageListener {
 		throw new StockException("Cannot find stock!");
 	}
 	
-	/**
-	 * <p>1. Create a new ActiveMQConnectionFactory from url, which is set to ActiveMQConnection.DEFAULT_BROKER_URL
-	 * <p>2. Use the ConnectionFactory to create a new TopicConnection and a new QueueConnection
-	 * <p>3. Use Connections to create TopicSession for publishing and QueueSession for initialization
+	/*
+	 * 1. Create a new ActiveMQConnectionFactory from url, which is set to ActiveMQConnection.DEFAULT_BROKER_URL
+	 * 2. Use the ConnectionFactory to create a new TopicConnection and a new QueueConnection
+	 * 3. Use Connections to create TopicSession for publishing and QueueSession for initialization
 	 */
 	private static void initializeJMS() throws Exception {
+		/*
+		 * JMS Pub/Sub Initialization, create session used by all topic publisher.
+		 */
 		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(url);
 		topicConn = connectionFactory.createTopicConnection();
 		queueConn = connectionFactory.createQueueConnection();
@@ -138,7 +138,7 @@ public class QuotePublisherA implements MessageListener {
 		stockInitSession = queueConn.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
 	}
 
-	/**
+	/*
 	 * Method registered in JMS, fired when a new message is available
 	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
 	 */
@@ -166,7 +166,7 @@ public class QuotePublisherA implements MessageListener {
 		}
 	}
 
-	/**
+	/*
 	 * Traverse daxCompanies to find corresponding company to setup respond message
 	 */
 	private String responseMsg(String txtMsg) {
@@ -184,7 +184,9 @@ public class QuotePublisherA implements MessageListener {
 		// No stock found, return "0", indicating invalid stock
 		return "0";
 	}
-
+	/**
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		QuotePublisherA qa = new QuotePublisherA();
 		// System.out.println(" [Publisher]\tPlease input command:");
@@ -290,7 +292,8 @@ public class QuotePublisherA implements MessageListener {
 }
 
 
-/**
+/*
+ *************************************************************************
  * Every thread will hold a stock. Change the quote randomly (5 to 15 sec)
  * And then publish it to respective topic.
  * Time stamp included

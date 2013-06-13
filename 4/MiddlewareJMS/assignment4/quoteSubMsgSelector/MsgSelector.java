@@ -11,7 +11,7 @@ import stocks.StockIdentifier;
 
 import quoteSubscriber.QuoteSubscriber;
 
-/**
+/*
  * Inherit from QuoteSubscriber, using the same constructor as superclass
  * Message selecting is performed by overriding createTopic method
  * Argument 'selector' is added when create TopicSubscriber
@@ -28,7 +28,7 @@ public class MsgSelector extends QuoteSubscriber implements java.io.Serializable
 		super(si, topicSession, queueSession);
 	}
 
-	/**
+	/*
 	 * Use topicSession to create topic and topicSubscriber
 	 */
 	@Override
@@ -40,12 +40,13 @@ public class MsgSelector extends QuoteSubscriber implements java.io.Serializable
 		this.topicSubscriber = super.topicSubscriber;
 	}
 	
-	/**
-	 * this method is registered in JMS, is called when a message is available
+	/*
+	 * onMessage, the method registered in JMS, is called when a message is available
+	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
+	 * 
 	 * Treat initialization messages and normal quote publish messages differently,
 	 * which is a pitfall due to the registrations of listener for both message are same method
 	 * should be improved
-	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
 	 */
 	@Override
 	public void onMessage(Message msg) {
