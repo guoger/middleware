@@ -3,6 +3,9 @@
 
 # compile source #
 *.class
+*/bin
+.classpath
+.settings
 
 
 # OS generated files #

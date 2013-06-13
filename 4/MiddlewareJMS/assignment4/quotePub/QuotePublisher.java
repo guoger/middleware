@@ -4,11 +4,6 @@ import javax.jms.*;
 
 import stocks.*;
 
-
-/*
- * Usage of QuotePublisher:
- * 
- */
 public class QuotePublisher {
 	private String subject;
 	

@@ -34,8 +34,8 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 	public transient boolean init = false;
 	
 	
-	/*
-	 * Constructor, accept StockIdentifier and a valid TopicSession
+	/**
+	 * Accept StockIdentifier and a valid TopicSession
 	 */
 	public QuoteSubscriber(StockIdentifier si, TopicSession topicSession, QueueSession queueSession) {
 		this.s = si;
@@ -48,11 +48,11 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 		return s;
 	}
 	
-	/*
-	 * Use session to setup subscriber
-	 * Bind this instance to JMS
-	 * Every time a message is available, onMessage() method will be called
-	 * And print entry info
+	/**
+	 * <p>Use session to setup subscriber
+	 * <p>Bind this instance to JMS
+	 * <p>Every time a message is available, onMessage() method will be called
+	 * <p>And print entry info
 	 */
 	public void setup() throws JMSException {
 		this.subject = s.getValue();
@@ -79,7 +79,7 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 		*/
 	}
 	
-	/*
+	/**
 	 * Fast initialization
 	 */
 	public void fastInit() throws JMSException {
@@ -110,7 +110,7 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
         return Long.toHexString(randomLong);
     }
 	
-	/*
+	/**
 	 * Use topicSession to create topic and topicSubscriber
 	 */
 	public void createTopic() throws JMSException {
@@ -118,7 +118,7 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 		topicSubscriber = topicSession.createSubscriber(topic);
 	}
 	
-	/*
+	/**
 	 * onMessage, the method registered in JMS, is called when a message is available
 	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
 	 */
@@ -153,7 +153,7 @@ public class QuoteSubscriber implements MessageListener, java.io.Serializable {
 		}
 	}
 	
-	/*
+	/**
 	 * Parse String to Date
 	 */
 	public void parseMessage(String msg) {
