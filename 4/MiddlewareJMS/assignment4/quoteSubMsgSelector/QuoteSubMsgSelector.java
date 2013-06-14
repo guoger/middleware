@@ -25,8 +25,6 @@ public class QuoteSubMsgSelector {
 	Company tempCompany;
 	
 	// JMS tools
-	static TopicSession stockSubscribeSession;
-	static QueueSession stockInitSession;
 	static MsgSelector quoteSubscriber;
 	static TopicConnection topicConn;
 	static QueueConnection queueConn;
@@ -77,7 +75,7 @@ public class QuoteSubMsgSelector {
 				stockIdentifier = new StockName(temp);
 			}
 			quoteSubscriber =
-					new MsgSelector(stockIdentifier, stockSubscribeSession, stockInitSession);
+					new MsgSelector(stockIdentifier, topicSess, queueSess);
 			quoteSubscriber.print = true;
 			// Insert and start a new MsgSelector thread
 			watchList.addElement(quoteSubscriber);
@@ -103,8 +101,8 @@ public class QuoteSubMsgSelector {
 		watchList = (Vector<MsgSelector>) in.readObject();
 		for (MsgSelector q : watchList) {
 			// q.dateFormat = new SimpleDateFormat("yyyyMMddHHmmssz");
-			q.topicSession = stockSubscribeSession;
-			q.queueSession = stockInitSession;
+			q.topicSession = topicSess;
+			q.queueSession = queueSess;
 			q.print = true;
 			// System.out.println(q.topicSubscriber);
 			
@@ -175,7 +173,7 @@ public class QuoteSubMsgSelector {
 		}
 		// Create new StockSubscriber
 		quoteSubscriber =
-				new MsgSelector(si, stockSubscribeSession, stockInitSession);
+				new MsgSelector(si, topicSess, queueSess);
 		// Insert and start a new MsgSelector thread
 		watchList.addElement(quoteSubscriber);
 		quoteSubscriber.fastInit();
@@ -330,8 +328,8 @@ public class QuoteSubMsgSelector {
 		System.out.println("***************************************************\n");
 		// Close topic session and connection
 		try {
-			stockSubscribeSession.close();
-			stockInitSession.close();
+			topicSess.close();
+			queueSess.close();
 			topicConn.close();
 			queueConn.close();
 		} catch (JMSException e1) {

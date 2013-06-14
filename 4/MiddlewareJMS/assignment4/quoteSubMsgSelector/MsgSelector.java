@@ -66,8 +66,8 @@ public class MsgSelector extends QuoteSubscriber implements java.io.Serializable
 		try {
 			if (msg.getJMSType() != null && msg.getJMSType().equals("Init")) {
 				// System.out.println(msg);
-				this.upperThres = (float) (super.currentQuote * 1.05);
-				this.lowerThres = (float) (super.currentQuote * 0.95);
+				this.upperThres = (float) (super.currentQuote * 1.02);
+				this.lowerThres = (float) (super.currentQuote * 0.98);
 				System.out.print("\n [Subscriber] "+s.getValue()+"\n\t\t");
 				System.out.printf("%.2f", currentQuote);
 				System.out.println("\t\t| "+currentTime);
