@@ -1,0 +1,9 @@
+use run.sh to run quote publisher and normal subscriber.
+use runSelector.sh to run quote publisher and subscriber with message selector.
+
+quotePub/*.java are for publisher
+quoteSubscriber/*.java are for normal subscriber
+quoteSubMsgSelector/*.java are for subscriber with message selector
+
+DAX.in is for market establish
+sub.in stores subscribe list to run the subscriber if no serialized file available.
