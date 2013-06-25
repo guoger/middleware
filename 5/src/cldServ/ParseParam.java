@@ -1,7 +1,7 @@
 package cldServ;
 
 public class ParseParam {
-	public static Object parse(String type, String param) {
+	public static Object parseValue(String type, String param) {
 		if (type.equals("String")) {
 			return param;
 		} else if (type.equals("Float") || type.equals("float")) {
@@ -18,6 +18,38 @@ public class ParseParam {
 			return Boolean.parseBoolean(param);
 		} else {
 			return null;
+		}
+	}
+	
+	public static Class<?> parseType(String type) throws TypeException {
+		if (type.equals("String")) {
+			return String.class;
+		} else if (type.equals("Float")) {
+			return Float.class;
+		} else if (type.equals("float")) {
+			return float.class;
+		} else if (type.equals("Integer")) {
+			return Integer.class;
+		} else if (type.equals("int")) {
+			return int.class;
+		} else if (type.equals("Short")) {
+			return Short.class;
+		} else if (type.equals("short")) {
+			return short.class;
+		} else if (type.equals("Long")) {
+			return Long.class;
+		} else if (type.equals("long")) {
+			return long.class;
+		} else if (type.equals("Double")) {
+			return Double.class;
+		} else if (type.equals("double")) {
+			return double.class;
+		} else if (type.equals("Boolean")) {
+			return Boolean.class;
+		} else if (type.equals("boolean")) {
+			return boolean.class;
+		} else {
+			throw new TypeException(type);
 		}
 	}
 }

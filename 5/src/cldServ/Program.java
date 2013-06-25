@@ -24,18 +24,24 @@ public class Program extends HashMap<Method, ParamList> {
 		this.usrObj = obj;
 	}
 
-	void retrieveMtds(String mtdName, ParamList parList)
-			throws SecurityException, NoSuchMethodException {
+	void retrieveMtds(String mtdName, ParamList paramList, ParamTypes paramTypes)
+			throws SecurityException, NoSuchMethodException,
+			InstantiationException, IllegalAccessException {
 		// ParamTypes parTypes = parList.convertToTypes();
 		int index = 0;
-		Class<?>[] parTypes = new Class<?>[parList.size()];
-		for (Object o : parList) {
-			parTypes[index] = o.getClass();
+		Class<?>[] paramTypesArray = new Class<?>[paramTypes.size()];
+		for (Class<?> cls : paramTypes) {
+			paramTypesArray[index] = cls;
 			index++;
 		}
-		Method usrMtd = usrClaz.getMethod(mtdName, parTypes);
-		this.put(usrMtd, parList);
-		System.out.println(this);
+		Method usrMtd = usrClaz.getMethod(mtdName, paramTypesArray);
+		this.put(usrMtd, paramList);
+		// Check whether the method is static, which indicates whether to
+		// instantiate an object. If an object already exists, just ignore
+		int mod = usrMtd.getModifiers();
+		if (!Modifier.isStatic(mod) && this.usrObj == null) {
+			this.usrObj = this.usrClaz.newInstance();
+		}
 	}
 
 	void retrieveAntdMtd(String annotation) {
@@ -66,6 +72,7 @@ public class Program extends HashMap<Method, ParamList> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append("Invoke List:\n");
 		Iterator<Map.Entry<Method, ParamList>> iter = this.entrySet()
 				.iterator();
 		while (iter.hasNext()) {
@@ -81,19 +88,28 @@ public class Program extends HashMap<Method, ParamList> {
 	public static void main(String[] args) {
 		try {
 			Class<?> cls = Class.forName("parseClass.HelloWorld");
+			Method[] mtd = cls.getDeclaredMethods();
+			for (Method m : mtd) {
+				System.out.println(m);
+			}
 			Program prog = new Program(cls);
 			ParamList parList1 = new ParamList();
-			prog.retrieveMtds("foo", parList1);
-			prog.retrieveMtds("bar", parList1);
+			ParamTypes parTypes1 = new ParamTypes();
+			prog.retrieveMtds("foo", parList1, parTypes1);
+			prog.retrieveMtds("bar", parList1, parTypes1);
 			ParamList parList2 = new ParamList();
-			String a = "a";
+			ParamTypes parTypes2 = new ParamTypes();
+			float a = (float)2.0;
 			String b = "b";
 			parList2.add(a);
 			parList2.add(b);
-			prog.retrieveMtds("withPar", parList2);
-			ParamList parList3 = new ParamList();
-			prog.retrieveMtds("number", parList3);
+			parTypes2.add(float.class);
+			parTypes2.add(b.getClass());
 			
+			prog.retrieveMtds("withPar", parList2, parTypes2);
+			ParamList parList3 = new ParamList();
+			//prog.retrieveMtds("number", parList3);
+
 			// prog.retrieveAntdMtd("Invoke");
 			ReturnVal ret = prog.execute();
 			System.out.println(ret);
@@ -113,6 +129,9 @@ public class Program extends HashMap<Method, ParamList> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

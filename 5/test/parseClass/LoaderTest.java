@@ -11,18 +11,20 @@ public class LoaderTest {
 		try {
 			//Byte test = 5;
 			//Object test1 = Integer.class.cast(test);
-			Object test = "4";
-			System.out.println(test.getClass());
+			// System.out.println(float.class);
+			System.out.println(float.class+" "+Float.class);
+			Object param1 = (float)4.0;
+			Object param2 = "2";
 			Class[] paa = new Class[2]; // Class does not have public constructor
 			ArrayList<Class<?>> pab = new ArrayList<Class<?>>();
-			paa[0] = test.getClass();
-			paa[1] = test.getClass();
-			pab.add(test.getClass());
-			pab.add(test.getClass());
+			paa[0] = param1.getClass();
+			paa[1] = param2.getClass();
+			pab.add(param1.getClass());
+			pab.add(param2.getClass());
 			
 			ArrayList<Object> parameters = new ArrayList<Object>();
-			parameters.add(test);
-			parameters.add(test);
+			parameters.add(param1);
+			parameters.add(param2);
 			
 			Class<?> cls = Class.forName("parseClass.HelloWorld");
 			System.out.println(cls.getCanonicalName());
@@ -80,6 +82,13 @@ public class LoaderTest {
 				}
 			}
 			
+			// modifier
+			tempMtd = cls.getDeclaredMethod("foo");
+			int modifier = tempMtd.getModifiers();
+			if (Modifier.isStatic(modifier)) {
+				System.out.println("foo is static");
+			}
+			System.out.println("foo's modifier is "+modifier);
 			
 			// return type
 			tempMtd = cls.getDeclaredMethod("number", null);
@@ -98,6 +107,12 @@ public class LoaderTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		String[] sp = "String ok,float 1".split(",");
+		for (String s : sp) {
+			System.out.println(s);
+		}
+		System.out.println("Length of aaaa is "+"aaaa".length());
+		System.out.println("abcd".substring(0, 3));
 	}
-
 }
