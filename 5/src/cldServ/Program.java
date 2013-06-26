@@ -5,16 +5,27 @@
 
 package cldServ;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import javax.tools.JavaCompiler;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
+
 import util.*;
 
 @SuppressWarnings("serial")
 public class Program extends HashMap<Method, ParamVals> {
 	Class<?> usrClaz;
 	Object usrObj = null;
+	JavaCompiler jc = null;
 
 	public Program(Class<?> claz) {
 		this.usrClaz = claz;
@@ -23,6 +34,21 @@ public class Program extends HashMap<Method, ParamVals> {
 	public Program(Class<?> claz, Object obj) {
 		this.usrClaz = claz;
 		this.usrObj = obj;
+	}
+	
+	public Program(File javaFile) throws IOException, ClassNotFoundException {
+		jc = ToolProvider.getSystemJavaCompiler();
+		StandardJavaFileManager sjfm = 
+				jc.getStandardFileManager(null, null, null);
+		Iterable fileObjects = sjfm.getJavaFileObjects(javaFile);
+		String[] options = new String[]{"-d", "/Users/guoger/workspace/middleware/5/serverbin"};
+		jc.getTask(null, null, null, Arrays.asList(options), null, fileObjects).call();
+		sjfm.close();
+		System.out.println("Compile successfully!");
+		URL[] urls = new URL[]{ new URL("file:/Users/guoger/workspace/middleware/5/serverbin/")};
+		URLClassLoader ucl = new URLClassLoader(urls);
+		usrClaz = ucl.loadClass("HelloWorld");
+		System.out.println("Class HelloWorld has been successfully loaded");
 	}
 
 	/**
@@ -89,6 +115,7 @@ public class Program extends HashMap<Method, ParamVals> {
 			retObj = mtd.invoke(usrObj, this.get(mtd).toArray());
 			retVal.put(mtd, retObj);
 		}
+		// System.out.println("Is instantiated? "+(usrObj != null));
 		return retVal;
 	}
 
@@ -115,8 +142,9 @@ public class Program extends HashMap<Method, ParamVals> {
 		Parameter parameter = null;
 		Class<?> paramType = null;
 		Object paramVal = null;
+		File javaFile = new File("/Users/guoger/workspace/middleware/5/serverbin/HelloWorld.java");
 		try {
-			Class<?> cls = Class.forName("parseClass.HelloWorld");
+			// Prepare parameters
 			ParamList foo = new ParamList("withPar");
 			paramType = float.class;
 			paramVal = (float) 1.0;
@@ -126,9 +154,18 @@ public class Program extends HashMap<Method, ParamVals> {
 			paramVal = "OK";
 			parameter = new Parameter(paramType, paramVal);
 			foo.insert(parameter);
+			
+			// Load bytecode
+			Class<?> cls = Class.forName("parseClass.HelloWorld");
 			Program progFoo = new Program(cls);
 			progFoo.retrieveMtds(foo);
 			progFoo.execute();
+			
+			// Compile source code
+			Program progBar = new Program(javaFile);
+			progBar.retrieveMtds(foo);
+			progBar.execute();
+			
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -150,8 +187,10 @@ public class Program extends HashMap<Method, ParamVals> {
 		} catch (InvocationTargetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
 	}
 
 }

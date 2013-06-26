@@ -1,17 +1,13 @@
-package parseClass;
-
 public class HelloWorld {
 	
 	public HelloWorld() {
 		
 	}
 	
-	@Invoke(str = "HEIHEI")
 	public static void foo() {
 		System.out.println("foo");
 	}
 	
-	@Invoke(str = "HAHA")
 	public static void bar() {
 		System.out.println("bar");
 		foo();
