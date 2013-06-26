@@ -25,6 +25,14 @@ public class Program extends HashMap<Method, ParamVals> {
 		this.usrObj = obj;
 	}
 
+	/**
+	 * Retrieve a method using a ParamList
+	 * @param parList
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
 	void retrieveMtds(ParamList parList) throws SecurityException,
 			NoSuchMethodException, InstantiationException,
 			IllegalAccessException {
@@ -48,6 +56,10 @@ public class Program extends HashMap<Method, ParamVals> {
 		}
 	}
 
+	/**
+	 * Retrieve a method that has an annotation containing a specific string
+	 * @param annotation
+	 */
 	void retrieveAntdMtd(String annotation) {
 		Method[] allMtd = usrClaz.getMethods();
 		for (Method m : allMtd) {
@@ -62,6 +74,13 @@ public class Program extends HashMap<Method, ParamVals> {
 		}
 	}
 
+	/**
+	 * Execute all methods demanded in this program.
+	 * @return
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 */
 	public ReturnVal execute() throws IllegalArgumentException,
 			IllegalAccessException, InvocationTargetException {
 		ReturnVal retVal = new ReturnVal();
@@ -73,6 +92,9 @@ public class Program extends HashMap<Method, ParamVals> {
 		return retVal;
 	}
 
+	/**
+	 * Override toString method to print neatly.
+	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
