@@ -38,4 +38,22 @@ public class ParamList extends ArrayList<Parameter> implements
 		}
 		return paramVals;
 	}
+	
+	/**
+	 * Insert a parameter using type class and value object
+	 * @param type
+	 * @param val
+	 */
+	public void insert(Class<?> type, Object val) {
+		Parameter newParam = new Parameter(type, val);
+		this.add(newParam);
+	}
+	
+	/**
+	 * Insert a parameter to list
+	 * @param param
+	 */
+	public void insert(Parameter param) {
+		this.add(param);
+	}
 }

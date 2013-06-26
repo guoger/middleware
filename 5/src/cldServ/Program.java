@@ -25,9 +25,9 @@ public class Program extends HashMap<Method, ParamVals> {
 		this.usrObj = obj;
 	}
 
-	void retrieveMtds(ParamList parList)
-			throws SecurityException, NoSuchMethodException,
-			InstantiationException, IllegalAccessException {
+	void retrieveMtds(ParamList parList) throws SecurityException,
+			NoSuchMethodException, InstantiationException,
+			IllegalAccessException {
 		// ParamTypes parTypes = parList.convertToTypes();
 		int index = 0;
 		Class<?>[] paramTypesArray = new Class<?>[parList.size()];
@@ -65,10 +65,10 @@ public class Program extends HashMap<Method, ParamVals> {
 	public ReturnVal execute() throws IllegalArgumentException,
 			IllegalAccessException, InvocationTargetException {
 		ReturnVal retVal = new ReturnVal();
-		Object tempObj = null;
+		Object retObj = null;
 		for (Method mtd : this.keySet()) {
-			tempObj = mtd.invoke(usrObj, this.get(mtd).toArray());
-			retVal.put(mtd, tempObj);
+			retObj = mtd.invoke(usrObj, this.get(mtd).toArray());
+			retVal.put(mtd, retObj);
 		}
 		return retVal;
 	}
@@ -90,7 +90,46 @@ public class Program extends HashMap<Method, ParamVals> {
 	}
 
 	public static void main(String[] args) {
-
+		Parameter parameter = null;
+		Class<?> paramType = null;
+		Object paramVal = null;
+		try {
+			Class<?> cls = Class.forName("parseClass.HelloWorld");
+			ParamList foo = new ParamList("withPar");
+			paramType = float.class;
+			paramVal = (float) 1.0;
+			parameter = new Parameter(paramType, paramVal);
+			foo.insert(parameter);
+			paramType = String.class;
+			paramVal = "OK";
+			parameter = new Parameter(paramType, paramVal);
+			foo.insert(parameter);
+			Program progFoo = new Program(cls);
+			progFoo.retrieveMtds(foo);
+			progFoo.execute();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 }

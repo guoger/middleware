@@ -1,5 +1,5 @@
 /*
- * Consume a socket from Server and process the request of a single user
+ * Deal with socket
  */
 
 package cldServ;
