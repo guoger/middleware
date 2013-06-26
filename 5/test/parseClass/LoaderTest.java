@@ -12,8 +12,8 @@ public class LoaderTest {
 			//Byte test = 5;
 			//Object test1 = Integer.class.cast(test);
 			// System.out.println(float.class);
-			System.out.println(float.class+" "+Float.class);
-			Object param1 = (float)4.0;
+			// System.out.println(float.class+" "+Float.class);
+			Object param1 = "4";
 			Object param2 = "2";
 			Class[] paa = new Class[2]; // Class does not have public constructor
 			ArrayList<Class<?>> pab = new ArrayList<Class<?>>();
@@ -27,7 +27,7 @@ public class LoaderTest {
 			parameters.add(param2);
 			
 			Class<?> cls = Class.forName("parseClass.HelloWorld");
-			System.out.println(cls.getCanonicalName());
+			// System.out.println(cls.getCanonicalName());
 			Method[] methods = cls.getDeclaredMethods();
 			
 			// static methods
@@ -36,6 +36,14 @@ public class LoaderTest {
 			
 			tempMtd = cls.getDeclaredMethod("withPar", paa);
 			tempMtd.invoke(null, "1", "2");
+			
+			// parameter test
+			Object param = (float)5.0;
+			Class<?> paramCls = param.getClass();
+			System.out.println("Float type is "+paramCls);
+			paramCls = float.class;
+			System.out.println("float type is "+paramCls);
+			
 			// converting arraylist to array will work
 			Class[] tempClaz = new Class[pab.size()];
 			int index = 0;
@@ -50,6 +58,7 @@ public class LoaderTest {
 			
 			Object obj = cls.newInstance();
 			// parameters
+			/*
 			Object pa = "5";
 			Object[] paraList = null;
 			Class[] paramTyArr = null;
@@ -67,6 +76,7 @@ public class LoaderTest {
 					m.invoke(obj, paraList);
 				}
 			}
+			*/
 			
 			// annotation
 			for (Method m : methods) {
@@ -114,5 +124,7 @@ public class LoaderTest {
 		}
 		System.out.println("Length of aaaa is "+"aaaa".length());
 		System.out.println("abcd".substring(0, 3));
+		
+		
 	}
 }

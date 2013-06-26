@@ -17,12 +17,16 @@ public class HelloWorld {
 		foo();
 	}
 	
-	public static void withPar(float a, String b) {
+	public static void withPar(Float a, String b) {
 		System.out.println("withPar(float "+a+", String "+b+")");
 	}
 	
 	public static void withPar(String a, String b) {
 		System.out.println("withPar(String "+a+", String "+b+")");
+	}
+	
+	public static void withPar(float a, String b) {
+		System.out.println("withPar(float "+a+", String "+b+")");
 	}
 	
 	public static float number() {

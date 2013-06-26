@@ -9,9 +9,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
+import util.*;
 
-public class Program extends HashMap<Method, ParamList> {
+@SuppressWarnings("serial")
+public class Program extends HashMap<Method, ParamVals> {
 	Class<?> usrClaz;
 	Object usrObj = null;
 
@@ -24,20 +25,23 @@ public class Program extends HashMap<Method, ParamList> {
 		this.usrObj = obj;
 	}
 
-	void retrieveMtds(String mtdName, ParamList paramList, ParamTypes paramTypes)
+	void retrieveMtds(ParamList parList)
 			throws SecurityException, NoSuchMethodException,
 			InstantiationException, IllegalAccessException {
 		// ParamTypes parTypes = parList.convertToTypes();
 		int index = 0;
-		Class<?>[] paramTypesArray = new Class<?>[paramTypes.size()];
-		for (Class<?> cls : paramTypes) {
+		Class<?>[] paramTypesArray = new Class<?>[parList.size()];
+		for (Class<?> cls : parList.parseTypes()) {
 			paramTypesArray[index] = cls;
 			index++;
 		}
+		// retrieve corresponding method using method name and parameters type
+		// list
+		String mtdName = parList.mtdName;
 		Method usrMtd = usrClaz.getMethod(mtdName, paramTypesArray);
-		this.put(usrMtd, paramList);
-		// Check whether the method is static, which indicates whether to
-		// instantiate an object. If an object already exists, just ignore
+		this.put(usrMtd, parList.parseVals());
+		// Check whether the method is static, which indicates the necessity of
+		// instantiation.
 		int mod = usrMtd.getModifiers();
 		if (!Modifier.isStatic(mod) && this.usrObj == null) {
 			this.usrObj = this.usrClaz.newInstance();
@@ -73,10 +77,10 @@ public class Program extends HashMap<Method, ParamList> {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Invoke List:\n");
-		Iterator<Map.Entry<Method, ParamList>> iter = this.entrySet()
+		Iterator<java.util.Map.Entry<Method, ParamVals>> iter = this.entrySet()
 				.iterator();
 		while (iter.hasNext()) {
-			Map.Entry<Method, ParamList> entry = iter.next();
+			java.util.Map.Entry<Method, ParamVals> entry = iter.next();
 			sb.append(entry.getKey());
 			sb.append("=");
 			sb.append(entry.getValue());
@@ -86,55 +90,6 @@ public class Program extends HashMap<Method, ParamList> {
 	}
 
 	public static void main(String[] args) {
-		try {
-			Class<?> cls = Class.forName("parseClass.HelloWorld");
-			Method[] mtd = cls.getDeclaredMethods();
-			for (Method m : mtd) {
-				System.out.println(m);
-			}
-			Program prog = new Program(cls);
-			ParamList parList1 = new ParamList();
-			ParamTypes parTypes1 = new ParamTypes();
-			prog.retrieveMtds("foo", parList1, parTypes1);
-			prog.retrieveMtds("bar", parList1, parTypes1);
-			ParamList parList2 = new ParamList();
-			ParamTypes parTypes2 = new ParamTypes();
-			float a = (float)2.0;
-			String b = "b";
-			parList2.add(a);
-			parList2.add(b);
-			parTypes2.add(float.class);
-			parTypes2.add(b.getClass());
-			
-			prog.retrieveMtds("withPar", parList2, parTypes2);
-			ParamList parList3 = new ParamList();
-			//prog.retrieveMtds("number", parList3);
-
-			// prog.retrieveAntdMtd("Invoke");
-			ReturnVal ret = prog.execute();
-			System.out.println(ret);
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
 	}
 
