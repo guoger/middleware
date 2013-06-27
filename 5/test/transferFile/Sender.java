@@ -29,7 +29,14 @@ public class Sender {
 		parameter = new Parameter(paramType, paramVal);
 		foo.insert(parameter);
 		
+		oos.writeInt(Receiver.PARAMLIST);
 		oos.writeObject(foo);
+		
+		oos.writeInt(Receiver.PARAMLIST);
+		oos.writeObject(foo);
+		
+		oos.writeInt(Receiver.TERMINATE);
+		
 		oos.close();
 		os.close();
 		sock.close();
