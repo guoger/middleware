@@ -19,6 +19,6 @@ public class Parameter implements java.io.Serializable {
 	}
 
 	public String toString() {
-		return "(" + typeClaz + " " + paramVal + ")";
+		return "(" + typeClaz + " => " + paramVal + ")";
 	}
 }

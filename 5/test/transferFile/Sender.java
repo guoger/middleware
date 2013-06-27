@@ -3,27 +3,37 @@ package transferFile;
 import java.net.*;
 import java.io.*;
 
+import util.ParamList;
+import util.Parameter;
+
 public class Sender {
-  public static void main (String [] args ) throws IOException {
-    // create socket
-    ServerSocket servsock = new ServerSocket(13267);
-    while (true) {
-      System.out.println("Waiting...");
+	public static void main(String[] args) throws IOException {
+		// create socket
+		Socket sock = new Socket("localhost", 13267);
+		OutputStream os = sock.getOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(os);
+		
+		// prepare parameters
+		Parameter parameter = null;
+		Class<?> paramType = null;
+		Object paramVal = null;
 
-      Socket sock = servsock.accept();
-      System.out.println("Accepted connection : " + sock);
+		ParamList foo = new ParamList("withPar");
+		
+		paramType = float.class;
+		paramVal = (float) 1.0;
+		parameter = new Parameter(paramType, paramVal);
+		foo.insert(parameter);
+		paramType = String.class;
+		paramVal = "OK";
+		parameter = new Parameter(paramType, paramVal);
+		foo.insert(parameter);
+		
+		oos.writeObject(foo);
+		oos.close();
+		os.close();
+		sock.close();
+		// send an object
 
-      // sendfile
-      File myFile = new File ("temp");
-      byte [] mybytearray  = new byte [(int)myFile.length()];
-      FileInputStream fis = new FileInputStream(myFile);
-      BufferedInputStream bis = new BufferedInputStream(fis);
-      bis.read(mybytearray,0,mybytearray.length);
-      OutputStream os = sock.getOutputStream();
-      System.out.println("Sending...");
-      os.write(mybytearray,0,mybytearray.length);
-      os.flush();
-      sock.close();
-      }
-    }
+	}
 }

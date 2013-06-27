@@ -56,4 +56,22 @@ public class ParamList extends ArrayList<Parameter> implements
 	public void insert(Parameter param) {
 		this.add(param);
 	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("***Method name is: ");
+		sb.append(mtdName);
+		sb.append("***\n");
+		sb.append("Parameter list:\n");
+		int index = 1;
+		for (Parameter p : this) {
+			sb.append(index);
+			sb.append("\t");
+			sb.append(p);
+			sb.append("\n");
+			index++;
+		}
+		sb.append("**************************");
+		return sb.toString();
+	}
 }
