@@ -5,6 +5,12 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class ParamList extends ArrayList<Parameter> implements
 		java.io.Serializable {
+	public static final transient int TERMINATE = -1;
+	public static final transient int SOURCECODE = 0;
+	public static final transient int BYTECODE = 1;
+	public static final transient int PARAMLIST = 2;
+	public static final transient int INSTANCE = 3;
+	
 	public final String mtdName;
 	
 	public ParamList(String mtdName) {

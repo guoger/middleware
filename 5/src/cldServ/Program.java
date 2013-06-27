@@ -27,10 +27,6 @@ public class Program extends HashMap<Method, ParamVals> {
 	Object usrObj = null;
 	JavaCompiler jc = null;
 
-	public Program(Class<?> claz) {
-		this.usrClaz = claz;
-	}
-
 	public Program(Class<?> claz, Object obj) {
 		this.usrClaz = claz;
 		this.usrObj = obj;
@@ -157,7 +153,7 @@ public class Program extends HashMap<Method, ParamVals> {
 			
 			// Load bytecode
 			Class<?> cls = Class.forName("parseClass.HelloWorld");
-			Program progFoo = new Program(cls);
+			Program progFoo = new Program(cls, null);
 			progFoo.retrieveMtds(foo);
 			progFoo.execute();
 			
