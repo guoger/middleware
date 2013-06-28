@@ -22,6 +22,7 @@ public class Jobs extends Thread {
 	boolean dupClaz = false;
 	ArrayList<ParamList> mtdList = new ArrayList<ParamList>();
 	Program usrProg;
+	String fileName;
 	String clsName;
 
 	public Jobs(Socket socket) {
@@ -34,14 +35,12 @@ public class Jobs extends Thread {
 		ParamList parList;
 		while (true) {
 			dataType = ois.readInt();
-			if (dataType == ParamList.SOURCECODE) {
-
-			} else if (dataType == ParamList.BYTECODE && !dupClaz) {
+			if (dataType == ParamList.CODE && !dupClaz) {
 				dupClaz = true;
-				clsName = ois.readUTF();
+				fileName = ois.readUTF();
 				long clsSize = ois.readLong();
 				FileOutputStream fos = new FileOutputStream(dirPath + "/"
-						+ clsName);
+						+ fileName);
 				BufferedOutputStream bos = new BufferedOutputStream(fos);
 
 				for (int i = 0; i < clsSize; i++) {

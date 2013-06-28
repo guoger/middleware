@@ -8,6 +8,8 @@ import util.Parameter;
 
 public class Sender {
 	public static void main(String[] args) throws IOException {
+		File file = new File("temp");
+		System.out.println(file.getName());
 		// create socket
 		Socket sock = new Socket("localhost", 13267);
 		OutputStream os = sock.getOutputStream();
