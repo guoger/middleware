@@ -17,7 +17,7 @@ public abstract class Request extends Thread {
 	/** 
 	 * User need to implement this abstract method to form params
 	 */
-	abstract ParamList[] formParams();
+	protected abstract ParamList[] formParams();
 	
 	/**
 	 * Send ParamLists and bytecode/sourcecode to server
@@ -30,13 +30,12 @@ public abstract class Request extends Thread {
 		ObjectOutputStream oos = new ObjectOutputStream
 				(new BufferedOutputStream(socket.getOutputStream()));
 		// For socket input, client will only receive a serialized ReturnVal
-		ObjectInputStream dis = new ObjectInputStream
-				(new BufferedInputStream(socket.getInputStream()));
+		// ObjectInputStream dis = new ObjectInputStream
+		//		(new BufferedInputStream(socket.getInputStream()));
 		FileInputStream fis = new FileInputStream(file);
 		BufferedInputStream bis = new BufferedInputStream(fis);
 		
 		long length = file.length();
-		
 		
 		// Send file
 		oos.writeInt(ParamList.CODE);
@@ -55,5 +54,24 @@ public abstract class Request extends Thread {
 		
 		// Send terminate
 		oos.writeInt(ParamList.TERMINATE);
+		
+		oos.close();
+		bis.close();
+		fis.close();
+		// dis.close();
+		socket.close();
+	}
+	
+	@Override
+	public void run() {
+		try {
+			sendTo();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

@@ -19,6 +19,7 @@ public class Server {
 		System.out.println(" [SERVER] Starting on port 5000\n");
 		while (true) {
 			Socket newClt = server.accept();
+			System.out.println("new client "+newClt.getInetAddress());
 			Jobs job = new Jobs(newClt);
 			job.start();
 		}

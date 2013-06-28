@@ -107,6 +107,7 @@ public class Program extends HashMap<Method, ParamVals> {
 			IllegalAccessException, InvocationTargetException {
 		ReturnVal retVal = new ReturnVal();
 		Object retObj = null;
+		System.out.println(this);
 		for (Method mtd : this.keySet()) {
 			retObj = mtd.invoke(usrObj, this.get(mtd).toArray());
 			retVal.put(mtd, retObj);

@@ -37,7 +37,8 @@ public class Jobs extends Thread {
 			dataType = ois.readInt();
 			if (dataType == ParamList.CODE && !dupClaz) {
 				dupClaz = true;
-				fileName = ois.readUTF();
+				fileName = (String) ois.readUTF();
+				clsName = fileName.substring(0, fileName.length()-6);
 				long clsSize = ois.readLong();
 				FileOutputStream fos = new FileOutputStream(dirPath + "/"
 						+ fileName);
@@ -50,6 +51,7 @@ public class Jobs extends Thread {
 				fos.close();
 			} else if (dataType == ParamList.PARAMLIST) {
 				parList = (ParamList) ois.readObject();
+				mtdList.add(parList);
 			} else if (dataType == ParamList.TERMINATE) {
 				return;
 			} else {
@@ -61,11 +63,12 @@ public class Jobs extends Thread {
 	void formProgram() throws MalformedURLException, ClassNotFoundException,
 			SecurityException, NoSuchMethodException, InstantiationException,
 			IllegalAccessException {
-		URL url = new URL("file:" + dirPath);
+		URL url = new URL("file://"+dirPath+"/");
 		URL[] urls = new URL[] { url };
 		URLClassLoader clsLoader = URLClassLoader.newInstance(urls);
 		usrClaz = clsLoader.loadClass(clsName);
 		usrProg = new Program(usrClaz, usrObj);
+		
 		for (ParamList pl : mtdList) {
 			usrProg.retrieveMtds(pl);
 		}
@@ -75,43 +78,28 @@ public class Jobs extends Thread {
 	public void run() {
 		ObjectInputStream ois = null;
 		ReturnVal ret = null;
-		
-		try {
-			InputStream is = socket.getInputStream();
-			ois = new ObjectInputStream(is);
-		} catch (IOException e) {
-			try {
-				socket.close();
-			} catch (IOException e1) {
-				System.out.println("Socket shut down error: " + this);
-			} finally {
-				this.stop();
-			}
-		}
 
-		// Receive all the data needed for loading class and retrieving methods.
-		if (ois != null) {
-			try {
-				recvData(ois);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-		// Try to form the program and retrieve the methods that will be invoked later
 		try {
+			ois = new ObjectInputStream(new BufferedInputStream(
+					socket.getInputStream()));
+			// Receive all the data needed for loading class and retrieving
+			// methods.
+			recvData(ois);
+			// Try to form the program and retrieve the methods that will be invoked
+			// later
 			formProgram();
-		} catch (MalformedURLException e) {
+			// Try to form the program and retrieve the methods that will be invoked
+			// later
+			ret = usrProg.execute();
+			
+			System.out.println(ret);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
@@ -123,23 +111,12 @@ public class Jobs extends Thread {
 		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-
-		try {
-			ret = usrProg.execute();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
-		if (ret != null) {
-			System.out.println(ret);
 		}
 	}
 
