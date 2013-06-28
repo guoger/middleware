@@ -6,10 +6,9 @@ import java.util.*;
 public class ParamList extends ArrayList<Parameter> implements
 		java.io.Serializable {
 	public static final transient int TERMINATE = -1;
-	public static final transient int SOURCECODE = 0;
-	public static final transient int BYTECODE = 1;
-	public static final transient int PARAMLIST = 2;
-	public static final transient int INSTANCE = 3;
+	public static final transient int CODE = 0;
+	public static final transient int PARAMLIST = 1;
+	public static final transient int INSTANCE = 2;
 	
 	public final String mtdName;
 	
