@@ -1,5 +1,6 @@
 package parseClass;
 
+import java.io.File;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.ArrayList;
@@ -125,6 +126,15 @@ public class LoaderTest {
 		System.out.println("Length of aaaa is "+"aaaa".length());
 		System.out.println("abcd".substring(0, 3));
 		
+		File file = new File("./serverbin");
+		System.out.println("file exist: "+file.exists());
+		System.out.println(file.getAbsolutePath());
+		System.out.println(file.separator);
+		System.out.println(file.separatorChar);
+		System.out.println(File.pathSeparator);
+		String[] list = file.list();
+		//for (String s : list)
+		//	System.out.println(s);
 		
 	}
 }

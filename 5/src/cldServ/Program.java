@@ -12,6 +12,7 @@ import java.lang.reflect.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -32,32 +33,36 @@ public class Program extends HashMap<Method, ParamVals> {
 		this.usrObj = obj;
 	}
 	
+	/*
 	public Program(File javaFile) throws IOException, ClassNotFoundException {
 		jc = ToolProvider.getSystemJavaCompiler();
-		StandardJavaFileManager sjfm = 
-				jc.getStandardFileManager(null, null, null);
+		StandardJavaFileManager sjfm = jc.getStandardFileManager(null, null,
+				null);
 		Iterable fileObjects = sjfm.getJavaFileObjects(javaFile);
-		String[] options = new String[]{"-d", "/Users/guoger/workspace/middleware/5/serverbin"};
-		jc.getTask(null, null, null, Arrays.asList(options), null, fileObjects).call();
+		String[] options = new String[] { "-d",
+				"/Users/guoger/workspace/middleware/5/serverbin" };
+		jc.getTask(null, null, null, Arrays.asList(options), null, fileObjects)
+				.call();
 		sjfm.close();
 		System.out.println("Compile successfully!");
-		URL[] urls = new URL[]{ new URL("file:/Users/guoger/workspace/middleware/5/serverbin/")};
+		URL[] urls = new URL[] { new URL(
+				"file:/Users/guoger/workspace/middleware/5/serverbin/") };
 		URLClassLoader ucl = new URLClassLoader(urls);
 		usrClaz = ucl.loadClass("HelloWorld");
 		System.out.println("Class HelloWorld has been successfully loaded");
 	}
+	*/
 
 	/**
 	 * Retrieve a method using a ParamList
+	 * 
 	 * @param parList
 	 * @throws SecurityException
 	 * @throws NoSuchMethodException
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 */
-	void retrieveMtds(ParamList parList) throws SecurityException,
-			NoSuchMethodException, InstantiationException,
-			IllegalAccessException {
+	void retrieveMtds(ParamList parList) throws SecurityException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 		// ParamTypes parTypes = parList.convertToTypes();
 		int index = 0;
 		Class<?>[] paramTypesArray = new Class<?>[parList.size()];
@@ -80,6 +85,7 @@ public class Program extends HashMap<Method, ParamVals> {
 
 	/**
 	 * Retrieve a method that has an annotation containing a specific string
+	 * 
 	 * @param annotation
 	 */
 	void retrieveAntdMtd(String annotation) {
@@ -99,19 +105,27 @@ public class Program extends HashMap<Method, ParamVals> {
 	/**
 	 * Execute all methods demanded in this program.
 	 * @return
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
 	 */
-	public ReturnVal execute() throws IllegalArgumentException,
-			IllegalAccessException, InvocationTargetException {
+	public ReturnVal execute() {
 		ReturnVal retVal = new ReturnVal();
 		Object retObj = null;
-		System.out.println(this);
+		System.out.println(" [SERVER] run\n");
+		long before = System.currentTimeMillis();
 		for (Method mtd : this.keySet()) {
-			retObj = mtd.invoke(usrObj, this.get(mtd).toArray());
-			retVal.put(mtd, retObj);
+			try {
+				retObj = mtd.invoke(usrObj, this.get(mtd).toArray());
+			} catch (IllegalArgumentException e) {
+				retObj = e;
+			} catch (IllegalAccessException e) {
+				retObj = e;
+			} catch (InvocationTargetException e) {
+				retObj = e;
+			} finally {
+				retVal.put(mtd.toString(), retObj);
+			}
 		}
+		long after = System.currentTimeMillis();
+		retVal.time = after - before;
 		// System.out.println("Is instantiated? "+(usrObj != null));
 		return retVal;
 	}
@@ -122,13 +136,17 @@ public class Program extends HashMap<Method, ParamVals> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Invoke List:\n");
+		sb.append("Class: " + usrClaz.getCanonicalName());
+		sb.append("\nMethods to invoke:\n");
 		Iterator<java.util.Map.Entry<Method, ParamVals>> iter = this.entrySet()
 				.iterator();
+		int index = 1;
 		while (iter.hasNext()) {
+			sb.append(index + " ");
+			index++;
 			java.util.Map.Entry<Method, ParamVals> entry = iter.next();
 			sb.append(entry.getKey());
-			sb.append("=");
+			sb.append(" <= ");
 			sb.append(entry.getValue());
 			sb.append("\n");
 		}
@@ -139,7 +157,8 @@ public class Program extends HashMap<Method, ParamVals> {
 		Parameter parameter = null;
 		Class<?> paramType = null;
 		Object paramVal = null;
-		File javaFile = new File("/Users/guoger/workspace/middleware/5/serverbin/HelloWorld.java");
+		File javaFile = new File(
+				"/Users/guoger/workspace/middleware/5/serverbin/HelloWorld.java");
 		try {
 			// Prepare parameters
 			ParamList foo = new ParamList("withPar");
@@ -151,18 +170,15 @@ public class Program extends HashMap<Method, ParamVals> {
 			paramVal = "OK";
 			parameter = new Parameter(paramType, paramVal);
 			foo.insert(parameter);
-			
+
 			// Load bytecode
 			Class<?> cls = Class.forName("parseClass.HelloWorld");
 			Program progFoo = new Program(cls, null);
 			progFoo.retrieveMtds(foo);
 			progFoo.execute();
+
 			
-			// Compile source code
-			Program progBar = new Program(javaFile);
-			progBar.retrieveMtds(foo);
-			progBar.execute();
-			
+
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -179,12 +195,6 @@ public class Program extends HashMap<Method, ParamVals> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
