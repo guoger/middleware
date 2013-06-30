@@ -91,12 +91,11 @@ public class Program extends HashMap<Method, ParamVals> {
 	void retrieveAntdMtd(String annotation) {
 		Method[] allMtd = usrClaz.getMethods();
 		for (Method m : allMtd) {
-			Annotation[] allAnno = m.getDeclaredAnnotations();
+			Annotation[] allAnno = m.getAnnotations();
 			for (Annotation anno : allAnno) {
 				if (anno.toString().contains(annotation)) {
-					if (!this.containsKey(m)) {
-						this.put(m, null);
-					}
+					System.out.println("Invoke: "+m);
+					this.put(m, null);
 				}
 			}
 		}
@@ -109,11 +108,17 @@ public class Program extends HashMap<Method, ParamVals> {
 	public ReturnVal execute() {
 		ReturnVal retVal = new ReturnVal();
 		Object retObj = null;
+		Object[] param = null;
 		System.out.println(" [SERVER] run\n");
 		long before = System.currentTimeMillis();
 		for (Method mtd : this.keySet()) {
 			try {
-				retObj = mtd.invoke(usrObj, this.get(mtd).toArray());
+				if (this.get(mtd) == null) {
+					param = null;
+				} else {
+					param = this.get(mtd).toArray();
+				}
+				retObj = mtd.invoke(usrObj, param);
 			} catch (IllegalArgumentException e) {
 				retObj = e;
 			} catch (IllegalAccessException e) {

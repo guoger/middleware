@@ -1,4 +1,6 @@
-package parseClass;
+package de.tu_berlin.kbs.mwk.test;
+
+import parseClass.Invoke;
 
 public class HelloWorld {
 	
@@ -6,12 +8,12 @@ public class HelloWorld {
 		
 	}
 	
-	@Invoke(str = "HEIHEI")
+	@Invoke
 	public static void foo() {
 		System.out.println("foo");
 	}
 	
-	@Invoke(str = "HAHA")
+	@Invoke
 	public static void bar() {
 		System.out.println("bar");
 		foo();

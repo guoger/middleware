@@ -17,7 +17,7 @@ public class HelloWorldDemo extends Request {
 	@Override
 	protected ParamList[] formParams() {
 		// TODO Auto-generated method stub
-		ParamList pl = new ParamList("number");
+		// ParamList pl = new ParamList("withPar");
 		/*
 		Class<?> paramType = float.class;
 		Object paramVal = (float) 1.0;
@@ -28,7 +28,7 @@ public class HelloWorldDemo extends Request {
 		parameter = new Parameter(paramType, paramVal);
 		pl.insert(parameter);
 		*/
-		return new ParamList[]{pl};
+		return new ParamList[]{};
 	}
 
 	/**

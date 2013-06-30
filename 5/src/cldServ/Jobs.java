@@ -51,6 +51,8 @@ public class Jobs extends Thread {
 			} else if (dataType == ParamList.PARAMLIST) {
 				parList = (ParamList) ois.readObject();
 				mtdList.add(parList);
+			} else if (dataType == ParamList.OBJECT) {
+				usrObj = (Object) ois.readObject();
 			} else if (dataType == ParamList.TERMINATE) {
 				return;
 			} else {
@@ -73,7 +75,7 @@ public class Jobs extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (NoSuchMethodException e) {
-				System.out.println(" [SERVER] No such method: "+pl);
+				System.out.println(" [SERVER] No such method: \n"+pl);
 			} catch (InstantiationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -82,6 +84,8 @@ public class Jobs extends Thread {
 				e.printStackTrace();
 			}
 		}
+		
+		usrProg.retrieveAntdMtd("Invoke");
 		
 		return usrProg;
 	}
@@ -192,6 +196,7 @@ public class Jobs extends Thread {
 		Program prog = null;
 		try {
 			prog = formProgram();
+			// System.out.println(prog);
 			retFlag = ReturnVal.LOAD_OK;
 		} catch (Exception e) {
 			e.printStackTrace();

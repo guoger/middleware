@@ -9,6 +9,7 @@ public class ParamList extends ArrayList<Parameter> implements
 	public static final transient int CODE = 0;
 	public static final transient int PARAMLIST = 1;
 	public static final transient int INSTANCE = 2;
+	public static final transient int OBJECT = 3;
 	
 	public final String mtdName;
 	

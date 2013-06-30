@@ -102,11 +102,13 @@ public class LoaderTest {
 			 */
 
 			// annotation
+			Class<?> claz = Class.forName("de.tu_berlin.kbs.mwk.test.Annotated");
+			methods = claz.getDeclaredMethods();
 			for (Method m : methods) {
 				Annotation[] annos = m.getAnnotations();
 				for (Annotation a : annos) {
 					// System.out.println(a.toString());
-					if (a.toString().startsWith("@parseClass.Invoke")) {
+					if (a.toString().endsWith("InvokeThis")) {
 						System.out.println(a + " has annotation Invoke");
 					}
 					if (a instanceof Invoke) {
