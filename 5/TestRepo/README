@@ -1,0 +1,12 @@
+HelloWorld.class:
+	Name: 		de.tu_berlin.kbs.mwk.test.HelloWorld
+	Method 1:	public static java.lang.Object helloWorld()
+
+Echo.class:
+	Name:		de.tu_berlin.kbs.mwk.test.Echo
+	Method 1:	public static java.lang.String echo(java.lang.String s)
+	Method 2:	public static java.lang.String echo(java.lang.String s, java.lang.Integer n)
+	
+Annotated:
+	Name:		de.tu_berlin.kbs.mwk.test.Annotated
+	Methods are marked by de.tu_berlin.kbs.reflect.InvokeThis
