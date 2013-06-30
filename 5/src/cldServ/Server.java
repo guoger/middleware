@@ -16,12 +16,12 @@ public class Server {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		File repo = new File("."+File.separator+"ServRepo");
+		File repo = new File("./ServRepo/de/tu_berlin/kbs/mwk/test");
 		if (repo.exists() && repo.isDirectory()) {
 			System.out.println(" [SERVER] Server repo: "+repo.getAbsolutePath());
 		} else {
 			System.out.println(" [SERVER] Create repo: "+repo.getAbsolutePath());
-			if (!repo.mkdir()) {
+			if (!repo.mkdirs()) {
 				System.out.println(" [SERVER] Create repo failed!");
 				System.exit(1);
 			}

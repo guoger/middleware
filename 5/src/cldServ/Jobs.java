@@ -25,9 +25,11 @@ public class Jobs extends Thread {
 	// Program usrProg;
 	String fileName;
 	String clsName;
+	String clazPath;
 
 	public Jobs(File repo, Socket socket) {
 		repoDir = repo.getAbsolutePath();
+		clazPath = repoDir.split("/de")[0];
 		this.socket = socket;
 	}
 
@@ -58,10 +60,10 @@ public class Jobs extends Thread {
 	}
 
 	Program formProgram() throws MalformedURLException, ClassNotFoundException {
-		URL url = new URL("file://"+repoDir+File.separator);
+		URL url = new URL("file://"+clazPath+File.separator);
 		URL[] urls = new URL[] { url };
 		URLClassLoader clsLoader = URLClassLoader.newInstance(urls);
-		usrClaz = clsLoader.loadClass(clsName);
+		usrClaz = clsLoader.loadClass("de.tu_berlin.kbs.mwk.test."+clsName);
 		Program usrProg = new Program(usrClaz, usrObj);
 		
 		for (ParamList pl : mtdList) {
@@ -132,7 +134,7 @@ public class Jobs extends Thread {
 		ObjectInputStream ois = null;
 		ObjectOutputStream oos = null;
 		ReturnVal ret = null;
-		int retFlag = 0;
+		int retFlag = ReturnVal.TERMINATE;
 
 		try {
 			oos = new ObjectOutputStream(new BufferedOutputStream(
@@ -166,6 +168,14 @@ public class Jobs extends Thread {
 		} finally {
 			try {
 				oos.writeInt(retFlag);
+				oos.flush();
+				retFlag = ReturnVal.TERMINATE;
+				if (retFlag == ReturnVal.COMPILATION_ERR || retFlag == ReturnVal.FILE_TYPE_ERR) {
+					oos.close();
+					ois.close();
+					socket.close();
+					return;
+				}
 			} catch (IOException e) {
 				try {
 					socket.close();
@@ -173,18 +183,7 @@ public class Jobs extends Thread {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-			}
-		}
-		
-		if (retFlag == ReturnVal.COMPILATION_ERR || retFlag == ReturnVal.FILE_TYPE_ERR) {
-			try {
-				oos.close();
-				ois.close();
-				socket.close();
 				return;
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 		
@@ -194,44 +193,40 @@ public class Jobs extends Thread {
 		try {
 			prog = formProgram();
 			retFlag = ReturnVal.LOAD_OK;
-		} catch (MalformedURLException e) {
-			retFlag = ReturnVal.LOAD_ERR;
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
 			retFlag = ReturnVal.LOAD_ERR;
-		}
-		
-		// write class load and method retrieve result back to client
-		try {
-			oos.writeInt(retFlag);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return;
-		}
-		if (retFlag == ReturnVal.LOAD_ERR) {
+		} finally {
 			try {
-				oos.close();
-				ois.close();
-				socket.close();
-				return;
+				oos.writeInt(retFlag);
+				oos.flush();
+				retFlag = ReturnVal.TERMINATE;
+				if (retFlag == ReturnVal.LOAD_ERR) {
+					oos.close();
+					ois.close();
+					socket.close();
+					return;
+				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				try {
+					socket.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				return;
 			}
 		}
 		
 		
-		// Try to form the program and retrieve the methods that will be invoked
-		// later
 		ret = prog.execute();
 		System.out.println(ret);
 		try {
 			oos.writeInt(ReturnVal.RESULT);
 			oos.writeObject(ret);
 			oos.writeInt(ReturnVal.TERMINATE);
+			oos.flush();
 			oos.close();
 			ois.close();
 			socket.close();

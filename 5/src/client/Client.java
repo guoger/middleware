@@ -2,7 +2,7 @@ package client;
 
 import java.io.File;
 
-import demoRequest.HelloWorldDemo;
+import demoRequest.*;
 
 public class Client {
 
@@ -11,10 +11,16 @@ public class Client {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		File file = new File("./clientpool/HelloWorld.java");
+		File file = new File("./a5applications/HelloWorld.java");
+		//File file = new File("./clientpool/HelloWorld.class");
+		if (!file.exists()) {
+			System.out.println(" [CLIENT] File does not exist!");
+			System.exit(1);
+		}
 		// System.out.println(file.getName());
-		HelloWorldDemo hw = new HelloWorldDemo(file);
-		hw.start();
+		HelloWorldDemo demo = new HelloWorldDemo(file);
+		//EchoDemo demo = new EchoDemo(file);
+		demo.start();
 	}
 
 }
