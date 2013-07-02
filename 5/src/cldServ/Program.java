@@ -21,6 +21,7 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 import util.*;
+import de.tu_berlin.kbs.reflect.*;
 
 @SuppressWarnings("serial")
 public class Program extends HashMap<Method, ParamVals> {
@@ -92,9 +93,8 @@ public class Program extends HashMap<Method, ParamVals> {
 		Method[] allMtd = usrClaz.getMethods();
 		for (Method m : allMtd) {
 			Annotation[] allAnno = m.getAnnotations();
-			for (Annotation anno : allAnno) {
-				if (anno.toString().contains(annotation)) {
-					System.out.println("Invoke: "+m);
+			for (Annotation a : allAnno) {
+				if (a.toString().contains("InvokeThis")) {
 					this.put(m, null);
 				}
 			}

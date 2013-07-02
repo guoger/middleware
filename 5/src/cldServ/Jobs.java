@@ -158,6 +158,7 @@ public class Jobs extends Thread {
 		try {
 			recvData(ois);
 			retFlag = ReturnVal.TRANSFER_OK;
+			System.out.println(" [SERVER] Data received successfully!");
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;
@@ -198,6 +199,8 @@ public class Jobs extends Thread {
 			prog = formProgram();
 			// System.out.println(prog);
 			retFlag = ReturnVal.LOAD_OK;
+			System.out.println(" [SERVER] Load "
+			+prog.usrClaz.getCanonicalName()+" successfully!");
 		} catch (Exception e) {
 			e.printStackTrace();
 			retFlag = ReturnVal.LOAD_ERR;
@@ -231,6 +234,8 @@ public class Jobs extends Thread {
 			oos.writeInt(ReturnVal.RESULT);
 			oos.writeObject(ret);
 			oos.writeInt(ReturnVal.TERMINATE);
+			System.out.println(" [SERVER] Terminate: "
+			+socket.getInetAddress()+":"+socket.getPort()+"\n");
 			oos.flush();
 			oos.close();
 			ois.close();

@@ -7,9 +7,9 @@ import util.Parameter;
 
 import client.Request;
 
-public class HelloWorldDemo extends Request {
+public class HelloWorldReq extends Request {
 
-	public HelloWorldDemo(File file) {
+	public HelloWorldReq(File file) {
 		super(file);
 		// TODO Auto-generated constructor stub
 	}
@@ -28,7 +28,9 @@ public class HelloWorldDemo extends Request {
 		parameter = new Parameter(paramType, paramVal);
 		pl.insert(parameter);
 		*/
-		return new ParamList[]{};
+		ParamList helloWorld = new ParamList("helloWorld");
+		
+		return new ParamList[]{helloWorld};
 	}
 
 	/**

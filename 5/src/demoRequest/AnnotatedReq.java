@@ -6,9 +6,9 @@ import util.ParamList;
 
 import client.Request;
 
-public class AnnotatedDemo extends Request {
+public class AnnotatedReq extends Request {
 
-	public AnnotatedDemo(File file) {
+	public AnnotatedReq(File file) {
 		super(file);
 		// TODO Auto-generated constructor stub
 	}

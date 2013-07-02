@@ -67,7 +67,7 @@ public abstract class Request extends Thread {
 			flag = ois.readInt();
 			switch (flag) {
 			case ReturnVal.RESULT:
-				System.out.println(" [CLIENT] Return value: ");
+				System.out.println(" [CLIENT] Return value: \n");
 				reply = (ReturnVal) ois.readObject();
 				System.out.println(reply);
 				break;

@@ -7,9 +7,9 @@ import util.Parameter;
 
 import client.Request;
 
-public class EchoDemo extends Request {
+public class EchoReq extends Request {
 
-	public EchoDemo(File file) {
+	public EchoReq(File file) {
 		super(file);
 		// TODO Auto-generated constructor stub
 	}
@@ -17,12 +17,12 @@ public class EchoDemo extends Request {
 	@Override
 	protected ParamList[] formParams() {
 		// TODO Auto-generated method stub
-		ParamList pl = new ParamList("echo");
+		ParamList echo = new ParamList("echo");
 		Class<?> paramType = String.class;
-		Object paramVal = "Hello";
+		Object paramVal = "Hello TU-Berlin!";
 		Parameter parameter = new Parameter(paramType, paramVal);
-		pl.insert(parameter);
-		return new ParamList[]{pl};
+		echo.insert(parameter);
+		return new ParamList[]{echo};
 	}
 
 }
