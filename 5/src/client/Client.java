@@ -2,6 +2,7 @@ package client;
 
 import java.io.File;
 
+import de.tu_berlin.kbs.mwk.test.Algebra;
 import demoRequest.*;
 
 /**
@@ -16,7 +17,7 @@ public class Client {
 			System.out.println(" [CLIENT] File does not exist: "+file);
 			System.exit(1);
 		}
-		AnnotatedReq annoReq = new AnnotatedReq(file);
+		AnnotatedReq annoReq = new AnnotatedReq(file, null);
 		annoReq.start();
 	}
 	
@@ -26,7 +27,7 @@ public class Client {
 			System.out.println(" [CLIENT] File does not exist: "+file);
 			System.exit(1);
 		}
-		HelloWorldReq helloWorldReq = new HelloWorldReq(file);
+		HelloWorldReq helloWorldReq = new HelloWorldReq(file, null);
 		helloWorldReq.start();
 	}
 	
@@ -36,17 +37,32 @@ public class Client {
 			System.out.println(" [CLIENT] File does not exist: "+file);
 			System.exit(1);
 		}
-		EchoReq echoReq = new EchoReq(file);
+		EchoReq echoReq = new EchoReq(file, null);
 		echoReq.start();
 	}
+	
+	public static void algebra() {
+		File file = new File("./src/de/tu_berlin/kbs/mwk/test/Algebra.java");
+		if (!file.exists()) {
+			System.out.println(" [CLIENT] File does not exist: "+file);
+			System.exit(1);
+		}
+		
+		Object algebra = new Algebra(4);
+		
+		AlgebraReq alReq = new AlgebraReq(file, algebra);
+		alReq.start();
+	}
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		echo();
-		helloWorld();
-		annotated();
+		//echo();
+		//helloWorld();
+		//annotated();
+		algebra();
 	}
 
 }

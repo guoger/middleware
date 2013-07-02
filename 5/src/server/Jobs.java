@@ -89,7 +89,7 @@ public class Jobs extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (NoSuchMethodException e) {
-				System.out.println(" [SERVER] No such method: \n"+pl);
+				System.out.println(" [SERVER] No such method: "+pl.mtdName);
 			} catch (InstantiationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -16,9 +16,12 @@ public abstract class Request extends Thread {
 	File file;
 
 	Socket socket;
+	
+	Object obj = null;
 
-	public Request(File file) {
+	public Request(File file, Object obj) {
 		this.file = file;
+		this.obj = obj;
 	}
 
 	/**
@@ -27,7 +30,7 @@ public abstract class Request extends Thread {
 	protected abstract ParamList[] formParams();
 
 	/**
-	 * Send ParamLists and bytecode/sourcecode to server Meanwhile, client will
+	 * Send ParamLists and byte code/source code to server Meanwhile, client will
 	 * wait for reply, which is a serialized ReturnVal
 	 * 
 	 * @throws UnknownHostException
@@ -53,6 +56,13 @@ public abstract class Request extends Thread {
 			oos.write(bis.read());
 		}
 		oos.flush();
+		
+		// Send object if applicable
+		if (obj != null) {
+			oos.writeInt(ParamList.OBJECT);
+			oos.writeObject(obj);
+			oos.flush();
+		}
 
 		// Send parameters
 		for (ParamList pl : formParams()) {

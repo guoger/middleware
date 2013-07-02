@@ -119,6 +119,7 @@ public class Program extends HashMap<Method, ParamVals> {
 		}
 		long after = System.currentTimeMillis();
 		retVal.time = after - before;
+		retVal.retObj = this.usrObj;
 		// System.out.println("Is instantiated? "+(usrObj != null));
 		return retVal;
 	}

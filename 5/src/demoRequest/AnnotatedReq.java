@@ -8,8 +8,9 @@ import client.Request;
 
 public class AnnotatedReq extends Request {
 
-	public AnnotatedReq(File file) {
-		super(file);
+
+	public AnnotatedReq(File file, Object obj) {
+		super(file, obj);
 		// TODO Auto-generated constructor stub
 	}
 

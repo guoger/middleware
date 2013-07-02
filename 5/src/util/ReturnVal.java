@@ -7,7 +7,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * A map of <Method name, return value>, containing execution time.
+ * A map of <Method name, return value>, containing execution time and probably
+ * manipulated object.
  * 
  */
 @SuppressWarnings("serial")
@@ -25,6 +26,8 @@ public class ReturnVal extends HashMap<String, Object> implements
 
 	public long time;
 
+	public Object retObj;
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -38,6 +41,9 @@ public class ReturnVal extends HashMap<String, Object> implements
 		}
 		sb.append("Total time: ");
 		sb.append(time);
+		sb.append("\n");
+		sb.append("Containing object? ");
+		sb.append((retObj != null));
 		sb.append("\n");
 		return sb.toString();
 	}

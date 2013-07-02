@@ -9,8 +9,8 @@ import client.Request;
 
 public class EchoReq extends Request {
 
-	public EchoReq(File file) {
-		super(file);
+	public EchoReq(File file, Object obj) {
+		super(file, obj);
 		// TODO Auto-generated constructor stub
 	}
 
