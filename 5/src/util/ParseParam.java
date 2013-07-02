@@ -1,6 +1,6 @@
 package util;
 
-import cldServ.TypeException;
+import server.TypeException;
 
 public class ParseParam {
 	public static Object parseValue(String type, String param) {

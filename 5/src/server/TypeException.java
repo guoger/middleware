@@ -1,4 +1,4 @@
-package cldServ;
+package server;
 
 public class TypeException extends Exception {
 	String errType;

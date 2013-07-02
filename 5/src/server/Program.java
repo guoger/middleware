@@ -3,7 +3,7 @@
  * consume a Class and do actual things
  */
 
-package cldServ;
+package server;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,26 +33,6 @@ public class Program extends HashMap<Method, ParamVals> {
 		this.usrClaz = claz;
 		this.usrObj = obj;
 	}
-	
-	/*
-	public Program(File javaFile) throws IOException, ClassNotFoundException {
-		jc = ToolProvider.getSystemJavaCompiler();
-		StandardJavaFileManager sjfm = jc.getStandardFileManager(null, null,
-				null);
-		Iterable fileObjects = sjfm.getJavaFileObjects(javaFile);
-		String[] options = new String[] { "-d",
-				"/Users/guoger/workspace/middleware/5/serverbin" };
-		jc.getTask(null, null, null, Arrays.asList(options), null, fileObjects)
-				.call();
-		sjfm.close();
-		System.out.println("Compile successfully!");
-		URL[] urls = new URL[] { new URL(
-				"file:/Users/guoger/workspace/middleware/5/serverbin/") };
-		URLClassLoader ucl = new URLClassLoader(urls);
-		usrClaz = ucl.loadClass("HelloWorld");
-		System.out.println("Class HelloWorld has been successfully loaded");
-	}
-	*/
 
 	/**
 	 * Retrieve a method using a ParamList

@@ -2,7 +2,7 @@
  * Deal with socket
  */
 
-package cldServ;
+package server;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
