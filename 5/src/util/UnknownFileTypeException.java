@@ -1,5 +1,9 @@
 package util;
 
+/**
+ * Thrown if received file is neither .java nor .class
+ *
+ */
 public class UnknownFileTypeException extends Exception {
 	public String fileName;
 	

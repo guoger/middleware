@@ -6,37 +6,44 @@ import java.net.UnknownHostException;
 
 import util.*;
 
+/**
+ * User need to implement abstract method formParams() to specify the methods to
+ * invoke and corresponding parameters.
+ * 
+ */
 public abstract class Request extends Thread {
-	
+
 	File file;
-	
+
 	Socket socket;
-	
+
 	public Request(File file) {
 		this.file = file;
 	}
-	
-	/** 
+
+	/**
 	 * User need to implement this abstract method to form params
 	 */
 	protected abstract ParamList[] formParams();
-	
+
 	/**
-	 * Send ParamLists and bytecode/sourcecode to server
-	 * Meanwhile, client will wait for reply, which is a serialized ReturnVal
+	 * Send ParamLists and bytecode/sourcecode to server Meanwhile, client will
+	 * wait for reply, which is a serialized ReturnVal
+	 * 
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	public void sendTo(ObjectOutputStream oos) throws UnknownHostException, IOException {
-		
+	public void sendTo(ObjectOutputStream oos) throws UnknownHostException,
+			IOException {
+
 		// For socket input, client will only receive a serialized ReturnVal
 		// ObjectInputStream dis = new ObjectInputStream
-		//		(new BufferedInputStream(socket.getInputStream()));
+		// (new BufferedInputStream(socket.getInputStream()));
 		FileInputStream fis = new FileInputStream(file);
 		BufferedInputStream bis = new BufferedInputStream(fis);
-		
+
 		long length = file.length();
-		
+
 		// Send file
 		oos.writeInt(ParamList.CODE);
 		oos.writeUTF(file.getName());
@@ -46,21 +53,22 @@ public abstract class Request extends Thread {
 			oos.write(bis.read());
 		}
 		oos.flush();
-		
+
 		// Send parameters
 		for (ParamList pl : formParams()) {
 			oos.writeInt(ParamList.PARAMLIST);
 			oos.writeObject(pl);
 		}
-		
+
 		// Send terminate
 		oos.writeInt(ParamList.TERMINATE);
 		oos.flush();
 		bis.close();
 		fis.close();
 	}
-	
-	public void recv(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+
+	public void recv(ObjectInputStream ois) throws IOException,
+			ClassNotFoundException {
 		int flag;
 		ReturnVal reply;
 		while (true) {
@@ -95,7 +103,7 @@ public abstract class Request extends Thread {
 			}
 		}
 	}
-	
+
 	@Override
 	public void run() {
 		ObjectOutputStream oos;
@@ -109,10 +117,12 @@ public abstract class Request extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		try {
-			ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-			oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+			ois = new ObjectInputStream(new BufferedInputStream(
+					socket.getInputStream()));
+			oos = new ObjectOutputStream(new BufferedOutputStream(
+					socket.getOutputStream()));
 			oos.flush();
 			sendTo(oos);
 			recv(ois);

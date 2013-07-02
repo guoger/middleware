@@ -2,6 +2,12 @@ package util;
 
 import java.util.*;
 
+/**
+ * A list of parameters, containing method name.
+ * ParamList acts as a message between server and client.
+ * Every user specified method will have a corresponding ParamList.
+ *
+ */
 @SuppressWarnings("serial")
 public class ParamList extends ArrayList<Parameter> implements
 		java.io.Serializable {

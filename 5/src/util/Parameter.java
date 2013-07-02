@@ -1,5 +1,9 @@
 package util;
 
+/**
+ * A tuple of <TYPE.class, VALUE.object>
+ *
+ */
 @SuppressWarnings("serial")
 public class Parameter implements java.io.Serializable {
 	public final Class<?> typeClaz;

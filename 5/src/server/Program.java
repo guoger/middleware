@@ -23,6 +23,11 @@ import javax.tools.ToolProvider;
 import util.*;
 import de.tu_berlin.kbs.reflect.*;
 
+/**
+ * A program is a map of <Method, ParamVals> in which ParamVals is used to
+ * invoke corresponding method.
+ * 
+ */
 @SuppressWarnings("serial")
 public class Program extends HashMap<Method, ParamVals> {
 	Class<?> usrClaz;
@@ -43,7 +48,9 @@ public class Program extends HashMap<Method, ParamVals> {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 */
-	void retrieveMtds(ParamList parList) throws SecurityException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+	void retrieveMtds(ParamList parList) throws SecurityException,
+			NoSuchMethodException, InstantiationException,
+			IllegalAccessException {
 		// ParamTypes parTypes = parList.convertToTypes();
 		int index = 0;
 		Class<?>[] paramTypesArray = new Class<?>[parList.size()];
@@ -83,13 +90,14 @@ public class Program extends HashMap<Method, ParamVals> {
 
 	/**
 	 * Execute all methods demanded in this program.
+	 * 
 	 * @return
 	 */
 	public ReturnVal execute() {
 		ReturnVal retVal = new ReturnVal();
 		Object retObj = null;
 		Object[] param = null;
-		System.out.println(" [SERVER] run\n");
+
 		long before = System.currentTimeMillis();
 		for (Method mtd : this.keySet()) {
 			try {
@@ -161,8 +169,6 @@ public class Program extends HashMap<Method, ParamVals> {
 			Program progFoo = new Program(cls, null);
 			progFoo.retrieveMtds(foo);
 			progFoo.execute();
-
-			
 
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block

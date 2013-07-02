@@ -1,7 +1,3 @@
-/*
- * Deal with socket
- */
-
 package server;
 
 import java.io.*;
@@ -16,6 +12,10 @@ import javax.tools.*;
 
 import util.*;
 
+/**
+ * For every user connection, a new Jobs will be instantiated to deal with data transfer.
+ *
+ */
 public class Jobs extends Thread {
 	Class<?> usrClaz;
 	Object usrObj = null;
@@ -33,6 +33,14 @@ public class Jobs extends Thread {
 		this.socket = socket;
 	}
 
+	/**
+	 * Consume an ObjectInputStream to receive all the data from client.
+	 * @param ois
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 * @throws UnknownFileTypeException
+	 * @throws CompilationException
+	 */
 	void recvData(ObjectInputStream ois) throws IOException,
 			ClassNotFoundException, UnknownFileTypeException, CompilationException {
 		int dataType;
@@ -61,6 +69,12 @@ public class Jobs extends Thread {
 		}
 	}
 
+	/**
+	 * Using received data to form a program.
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws ClassNotFoundException
+	 */
 	Program formProgram() throws MalformedURLException, ClassNotFoundException {
 		URL url = new URL("file://"+clazPath+File.separator);
 		URL[] urls = new URL[] { url };
@@ -90,9 +104,13 @@ public class Jobs extends Thread {
 		return usrProg;
 	}
 	
+	/**
+	 * Receive and store byte code.
+	 * @param ois
+	 * @throws IOException
+	 */
 	private void recvBytecode(ObjectInputStream ois) throws IOException {
 		clsName = fileName.split(".class")[0];
-		// clsName = fileName.substring(0, fileName.length()-6);
 		long clsSize = ois.readLong();
 		FileOutputStream fos = new FileOutputStream(repoDir+File.separator+fileName);
 		BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -104,10 +122,15 @@ public class Jobs extends Thread {
 		fos.close();
 	}
 
+	/**
+	 * Receive and store source code and compile.
+	 * @param ois
+	 * @throws IOException
+	 * @throws CompilationException
+	 */
 	private void recvSrccode(ObjectInputStream ois) throws IOException, CompilationException {
 		System.out.println(" [SERVER] Receive java Source code: "+fileName);
 		clsName = fileName.split(".java")[0];
-		// clsName = fileName.substring(0, fileName.length()-6);
 		long clsSize = ois.readLong();
 		FileOutputStream fos = new FileOutputStream(repoDir+File.separator+fileName);
 		BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -133,6 +156,14 @@ public class Jobs extends Thread {
 		return compiler.run(null, null, null, fileToCompile);
 	}
 
+	/**
+	 * Consume a socket;
+	 * Establish ObjectOutputStream and ObjectInputStream;
+	 * Receive data from client;
+	 * Form a program;
+	 * Run;
+	 * Transfer back return value;
+	 */
 	@Override
 	public void run() {
 		ObjectInputStream ois = null;
@@ -227,8 +258,9 @@ public class Jobs extends Thread {
 			}
 		}
 		
-		
+		System.out.println(" [SERVER] run");
 		ret = prog.execute();
+		System.out.println(" [SERVER] Return value: ");
 		System.out.println(ret);
 		try {
 			oos.writeInt(ReturnVal.RESULT);

@@ -14,6 +14,11 @@ public class EchoReq extends Request {
 		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 * For Echo.class
+	 * Request to invoke echo(String s) method in Echo.class
+	 * Return type is string
+	 */
 	@Override
 	protected ParamList[] formParams() {
 		// TODO Auto-generated method stub

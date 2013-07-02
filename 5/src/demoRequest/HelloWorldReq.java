@@ -14,22 +14,13 @@ public class HelloWorldReq extends Request {
 		// TODO Auto-generated constructor stub
 	}
 	
+	/**
+	 * For HelloWorld.class
+	 * invoke helloWorld() method.
+	 */
 	@Override
 	protected ParamList[] formParams() {
-		// TODO Auto-generated method stub
-		// ParamList pl = new ParamList("withPar");
-		/*
-		Class<?> paramType = float.class;
-		Object paramVal = (float) 1.0;
-		Parameter parameter = new Parameter(paramType, paramVal);
-		pl.insert(parameter);
-		paramType = String.class;
-		paramVal = "OK";
-		parameter = new Parameter(paramType, paramVal);
-		pl.insert(parameter);
-		*/
 		ParamList helloWorld = new ParamList("helloWorld");
-		
 		return new ParamList[]{helloWorld};
 	}
 

@@ -12,6 +12,8 @@ public class Server {
 		
 	}
 	/**
+	 * Create a directory at ./ServRepo/de/tu_berlin/kbs/mwk/test to store all received file;
+	 * Start listening on port 5000;
 	 * @param args
 	 * @throws IOException 
 	 */
