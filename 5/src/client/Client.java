@@ -56,12 +56,16 @@ public class Client {
 	
 	/**
 	 * @param args
+	 * @throws InterruptedException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		// TODO Auto-generated method stub
-		//echo();
-		//helloWorld();
-		//annotated();
+		echo();
+		Thread.sleep(1000);
+		helloWorld();
+		Thread.sleep(1000);
+		annotated();
+		Thread.sleep(1000);
 		algebra();
 	}
 
